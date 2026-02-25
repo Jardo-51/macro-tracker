@@ -24,7 +24,7 @@
               label="Food name"
               variant="outlined"
               density="compact"
-              class="mb-2"
+              class="mt-2 mb-4"
               hide-details
             />
             <MacroInputFields v-model="macros" />
@@ -67,7 +67,7 @@
               density="compact"
               prepend-inner-icon="mdi-magnify"
               hide-details
-              class="mb-2"
+              class="mt-2 mb-2"
             />
             <v-list density="compact" v-if="filteredFoods.length > 0">
               <v-list-item
@@ -107,7 +107,7 @@
               density="compact"
               prepend-inner-icon="mdi-magnify"
               hide-details
-              class="mb-2"
+              class="mt-2 mb-2"
             />
             <v-list density="compact" v-if="filteredMeals.length > 0">
               <v-list-item
