@@ -62,11 +62,122 @@
   import { seedDefaults } from '@/db/seed'
   import { useAppStore } from '@/stores/app'
   import { useDailyLogStore } from '@/stores/dailyLog'
+  import type { DailyGoals, DailyLogEntry, FoodItem, MealTemplate } from '@/types'
 
   const app = useAppStore()
   const dailyLog = useDailyLogStore()
   const confirmClear = ref(false)
   const fileInput = ref<HTMLInputElement>()
+
+  function isString(v: unknown): v is string {
+    return typeof v === 'string'
+  }
+
+  function isFiniteNum(v: unknown): v is number {
+    return typeof v === 'number' && isFinite(v)
+  }
+
+  function isValidMacros(m: unknown): boolean {
+    if (!m || typeof m !== 'object') return false
+    const o = m as Record<string, unknown>
+    return (
+      isFiniteNum(o.calories) &&
+      isFiniteNum(o.protein) &&
+      isFiniteNum(o.carbsTotal) &&
+      isFiniteNum(o.carbsFiber) &&
+      isFiniteNum(o.carbsSugar) &&
+      isFiniteNum(o.fat)
+    )
+  }
+
+  function isValidFoodItem(v: unknown): v is FoodItem {
+    if (!v || typeof v !== 'object') return false
+    const o = v as Record<string, unknown>
+    return (
+      isString(o.id) && o.id.length > 0 &&
+      isString(o.name) && o.name.length > 0 &&
+      isFiniteNum(o.servingSize) &&
+      isString(o.servingUnit) &&
+      isValidMacros(o.macros) &&
+      isString(o.createdAt)
+    )
+  }
+
+  function isValidMealTemplate(v: unknown): v is MealTemplate {
+    if (!v || typeof v !== 'object') return false
+    const o = v as Record<string, unknown>
+    return (
+      isString(o.id) && o.id.length > 0 &&
+      isString(o.name) && o.name.length > 0 &&
+      isValidMacros(o.macros) &&
+      isString(o.createdAt)
+    )
+  }
+
+  function isValidDailyLogEntry(v: unknown): v is DailyLogEntry {
+    if (!v || typeof v !== 'object') return false
+    const o = v as Record<string, unknown>
+    return (
+      isString(o.id) && o.id.length > 0 &&
+      isString(o.date) && /^\d{4}-\d{2}-\d{2}$/.test(o.date) &&
+      isString(o.name) && o.name.length > 0 &&
+      isFiniteNum(o.servings) &&
+      isValidMacros(o.macros) &&
+      (o.sourceType === 'manual' || o.sourceType === 'food' || o.sourceType === 'meal') &&
+      (o.sourceId === undefined || isString(o.sourceId)) &&
+      isString(o.createdAt)
+    )
+  }
+
+  function isValidDailyGoals(v: unknown): v is DailyGoals {
+    if (!v || typeof v !== 'object') return false
+    const o = v as Record<string, unknown>
+    return (
+      isString(o.id) && o.id.length > 0 &&
+      isFiniteNum(o.calories) &&
+      isFiniteNum(o.protein) &&
+      isFiniteNum(o.carbsTotal) &&
+      isFiniteNum(o.fat)
+    )
+  }
+
+  function validateImport(data: unknown): {
+    foodItems?: FoodItem[]
+    mealTemplates?: MealTemplate[]
+    dailyLogEntries?: DailyLogEntry[]
+    dailyGoals?: DailyGoals[]
+  } {
+    if (!data || typeof data !== 'object') throw new Error('Invalid file format')
+    const d = data as Record<string, unknown>
+
+    if (d.foodItems !== undefined) {
+      if (!Array.isArray(d.foodItems)) throw new Error('foodItems must be an array')
+      const invalid = d.foodItems.findIndex((v) => !isValidFoodItem(v))
+      if (invalid !== -1) throw new Error(`Invalid food item at index ${invalid}`)
+    }
+    if (d.mealTemplates !== undefined) {
+      if (!Array.isArray(d.mealTemplates)) throw new Error('mealTemplates must be an array')
+      const invalid = d.mealTemplates.findIndex((v) => !isValidMealTemplate(v))
+      if (invalid !== -1) throw new Error(`Invalid meal template at index ${invalid}`)
+    }
+    if (d.dailyLogEntries !== undefined) {
+      if (!Array.isArray(d.dailyLogEntries)) throw new Error('dailyLogEntries must be an array')
+      const invalid = d.dailyLogEntries.findIndex((v) => !isValidDailyLogEntry(v))
+      if (invalid !== -1) throw new Error(`Invalid log entry at index ${invalid}`)
+    }
+    if (d.dailyGoals !== undefined) {
+      if (!Array.isArray(d.dailyGoals)) throw new Error('dailyGoals must be an array')
+      const invalid = d.dailyGoals.findIndex((v) => !isValidDailyGoals(v))
+      if (invalid !== -1) throw new Error(`Invalid daily goal at index ${invalid}`)
+    }
+
+    return {
+      foodItems: d.foodItems as FoodItem[] | undefined,
+      mealTemplates: d.mealTemplates as MealTemplate[] | undefined,
+      dailyLogEntries: d.dailyLogEntries as DailyLogEntry[] | undefined,
+      dailyGoals: d.dailyGoals as DailyGoals[] | undefined,
+    }
+  }
 
   async function exportData() {
     const data = {
@@ -95,28 +206,29 @@
     if (!file) return
     try {
       const text = await file.text()
-      const data = JSON.parse(text)
-      if (data.foodItems) {
+      const validated = validateImport(JSON.parse(text))
+      if (validated.foodItems) {
         await db.foodItems.clear()
-        await db.foodItems.bulkAdd(data.foodItems)
+        await db.foodItems.bulkAdd(validated.foodItems)
       }
-      if (data.mealTemplates) {
+      if (validated.mealTemplates) {
         await db.mealTemplates.clear()
-        await db.mealTemplates.bulkAdd(data.mealTemplates)
+        await db.mealTemplates.bulkAdd(validated.mealTemplates)
       }
-      if (data.dailyLogEntries) {
+      if (validated.dailyLogEntries) {
         await db.dailyLogEntries.clear()
-        await db.dailyLogEntries.bulkAdd(data.dailyLogEntries)
+        await db.dailyLogEntries.bulkAdd(validated.dailyLogEntries)
       }
-      if (data.dailyGoals) {
+      if (validated.dailyGoals) {
         await db.dailyGoals.clear()
-        await db.dailyGoals.bulkAdd(data.dailyGoals)
+        await db.dailyGoals.bulkAdd(validated.dailyGoals)
       }
       await dailyLog.loadGoals()
       await dailyLog.loadDate()
       app.showSnackbar('Data imported successfully')
-    } catch {
-      app.showSnackbar('Failed to import data', 'error')
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : 'Unknown error'
+      app.showSnackbar(`Import failed: ${msg}`, 'error')
     }
     if (fileInput.value) fileInput.value.value = ''
   }
