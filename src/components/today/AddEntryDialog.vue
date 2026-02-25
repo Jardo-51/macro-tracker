@@ -3,8 +3,7 @@
     icon="mdi-plus"
     color="primary"
     location="bottom end"
-    absolute
-    app
+    style="position: fixed; bottom: 64px; right: 16px"
     @click="dialog = true"
   />
 
