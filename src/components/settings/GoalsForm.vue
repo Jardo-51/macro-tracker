@@ -16,8 +16,8 @@
         </v-col>
         <v-col cols="6">
           <v-text-field
-            v-model.number="form.protein"
-            label="Protein (g)"
+            v-model.number="form.fat"
+            label="Fat (g)"
             type="number"
             min="0"
             density="compact"
@@ -38,8 +38,8 @@
         </v-col>
         <v-col cols="6">
           <v-text-field
-            v-model.number="form.fat"
-            label="Fat (g)"
+            v-model.number="form.protein"
+            label="Protein (g)"
             type="number"
             min="0"
             density="compact"
