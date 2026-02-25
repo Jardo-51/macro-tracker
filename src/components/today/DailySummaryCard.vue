@@ -16,7 +16,7 @@
           </span>
         </div>
         <v-progress-linear
-          :model-value="store.progressPercentages[macro.goalKey]"
+          :model-value="Math.min(100, store.progressPercentages[macro.goalKey])"
           :color="macro.color"
           height="12"
           rounded

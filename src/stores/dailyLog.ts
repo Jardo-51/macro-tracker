@@ -43,10 +43,10 @@ export const useDailyLogStore = defineStore('dailyLog', () => {
   }))
 
   const progressPercentages = computed(() => ({
-    calories: Math.min(100, Math.round((dailyTotals.value.calories / goals.value.calories) * 100)),
-    protein: Math.min(100, Math.round((dailyTotals.value.protein / goals.value.protein) * 100)),
-    carbsTotal: Math.min(100, Math.round((dailyTotals.value.carbsTotal / goals.value.carbsTotal) * 100)),
-    fat: Math.min(100, Math.round((dailyTotals.value.fat / goals.value.fat) * 100)),
+    calories: Math.round((dailyTotals.value.calories / goals.value.calories) * 100),
+    protein: Math.round((dailyTotals.value.protein / goals.value.protein) * 100),
+    carbsTotal: Math.round((dailyTotals.value.carbsTotal / goals.value.carbsTotal) * 100),
+    fat: Math.round((dailyTotals.value.fat / goals.value.fat) * 100),
   }))
 
   async function loadGoals() {
