@@ -50,10 +50,17 @@
     Filler,
   } from 'chart.js'
   import { useHistoryStore } from '@/stores/history'
+  import { useTheme } from 'vuetify'
 
   ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler)
 
   const store = useHistoryStore()
+  const theme = useTheme()
+
+  const isDark = computed(() => theme.global.name.value === 'dark')
+  const gridColor = computed(() => isDark.value ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.1)')
+  const tickColor = computed(() => isDark.value ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)')
+  const legendColor = computed(() => isDark.value ? '#fff' : '#000')
 
   const range = ref(7)
   const selectedMacros = ref(['calories'])
@@ -88,16 +95,27 @@
     }
   })
 
-  const chartOptions = {
+  const chartOptions = computed(() => ({
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
-      legend: { position: 'bottom' as const },
+      legend: {
+        position: 'bottom' as const,
+        labels: { color: legendColor.value },
+      },
     },
     scales: {
-      y: { beginAtZero: true },
+      x: {
+        grid: { color: gridColor.value },
+        ticks: { color: tickColor.value },
+      },
+      y: {
+        beginAtZero: true,
+        grid: { color: gridColor.value },
+        ticks: { color: tickColor.value },
+      },
     },
-  }
+  }))
 
   watch(range, (val) => {
     store.loadRangeData(val)

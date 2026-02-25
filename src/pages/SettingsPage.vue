@@ -1,6 +1,7 @@
 <template>
   <v-container>
     <h1 class="text-h5 mb-4">Settings</h1>
+    <ThemeToggle />
     <GoalsForm />
     <DataManagement />
     <AboutSection />
@@ -8,6 +9,7 @@
 </template>
 
 <script lang="ts" setup>
+  import ThemeToggle from '@/components/settings/ThemeToggle.vue'
   import GoalsForm from '@/components/settings/GoalsForm.vue'
   import DataManagement from '@/components/settings/DataManagement.vue'
   import AboutSection from '@/components/settings/AboutSection.vue'

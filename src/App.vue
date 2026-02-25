@@ -15,8 +15,15 @@
 </template>
 
 <script lang="ts" setup>
+  import { watch } from 'vue'
+  import { useTheme } from 'vuetify'
   import AppBottomNav from '@/components/layout/AppBottomNav.vue'
   import { useAppStore } from '@/stores/app'
 
   const app = useAppStore()
+  const theme = useTheme()
+
+  watch(() => app.darkMode, (dark) => {
+    theme.global.name.value = dark ? 'dark' : 'light'
+  }, { immediate: true })
 </script>
