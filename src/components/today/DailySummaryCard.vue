@@ -4,7 +4,7 @@
       <span>Daily Progress</span>
       <v-spacer />
       <span class="text-body-2 text-medium-emphasis">
-        {{ store.dailyTotals.calories }} / {{ store.goals.calories }} kcal
+        {{ store.dailyTotals.calories }} / {{ store.goals.calories }} kcal ({{ Math.round(store.progressPercentages.calories) }}%)
       </span>
     </v-card-title>
     <v-card-text>
@@ -16,7 +16,7 @@
         <div class="d-flex justify-space-between text-body-2 mb-1">
           <span>{{ macro.label }}</span>
           <span>
-            {{ store.dailyTotals[macro.key] }}{{ macro.unit }} / {{ store.goals[macro.goalKey] }}{{ macro.unit }}
+            {{ store.dailyTotals[macro.key] }}{{ macro.unit }} / {{ store.goals[macro.goalKey] }}{{ macro.unit }} ({{ Math.round(store.progressPercentages[macro.goalKey]) }}%)
           </span>
         </div>
         <v-progress-linear
