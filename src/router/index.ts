@@ -1,19 +1,27 @@
-/**
- * router/index.ts
- *
- * Manual routes for ./src/pages/*.vue
- */
-
-// Composables
 import { createRouter, createWebHistory } from 'vue-router'
-import Index from '@/pages/index.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: '/',
-      component: Index,
+      redirect: '/today',
+    },
+    {
+      path: '/today',
+      component: () => import('@/pages/TodayPage.vue'),
+    },
+    {
+      path: '/history',
+      component: () => import('@/pages/HistoryPage.vue'),
+    },
+    {
+      path: '/meals',
+      component: () => import('@/pages/MealsPage.vue'),
+    },
+    {
+      path: '/settings',
+      component: () => import('@/pages/SettingsPage.vue'),
     },
   ],
 })
