@@ -1,11 +1,7 @@
 <template>
   <v-card>
-    <v-card-title class="d-flex align-center">
+    <v-card-title>
       <span>Daily Progress</span>
-      <v-spacer />
-      <span class="text-body-2 text-medium-emphasis">
-        {{ store.dailyTotals.calories }} / {{ store.goals.calories }} kcal ({{ Math.round(store.progressPercentages.calories) }}%)
-      </span>
     </v-card-title>
     <v-card-text>
       <div
