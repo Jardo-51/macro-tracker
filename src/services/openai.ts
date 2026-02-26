@@ -1,7 +1,9 @@
 import type { Macros } from '@/types'
 
 export async function estimateMacros(foodName: string, apiKey: string): Promise<Macros> {
-  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+  let response: Response
+  try {
+    response = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -26,7 +28,10 @@ export async function estimateMacros(foodName: string, apiKey: string): Promise<
         },
       ],
     }),
-  })
+    })
+  } catch (e: any) {
+    throw new Error(`Network error: ${e.message}. Check your internet connection or try a different network.`)
+  }
 
   if (!response.ok) {
     if (response.status === 401) {
