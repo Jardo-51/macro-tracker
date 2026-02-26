@@ -18,14 +18,28 @@
       <v-card-text>
         <v-tabs-window v-model="tab">
           <v-tabs-window-item value="manual">
-            <v-text-field
-              v-model="name"
-              label="Food name"
-              variant="outlined"
-              density="compact"
-              class="mt-2 mb-4"
-              hide-details
-            />
+            <div class="d-flex align-center mt-2 mb-4" style="gap: 8px">
+              <v-text-field
+                v-model="name"
+                label="Food name"
+                variant="outlined"
+                density="compact"
+                hide-details
+              />
+              <v-btn
+                v-if="appStore.openaiApiKey"
+                icon
+                size="small"
+                variant="tonal"
+                color="primary"
+                :disabled="!name.trim()"
+                :loading="estimating"
+                @click="estimate"
+              >
+                <v-icon>mdi-auto-fix</v-icon>
+                <v-tooltip activator="parent" location="top">Estimate macros with AI</v-tooltip>
+              </v-btn>
+            </div>
             <MacroInputFields v-model="macros" />
             <v-checkbox
               v-model="saveAsFood"
@@ -143,11 +157,14 @@
   import MacroInputFields from './MacroInputFields.vue'
   import { useDailyLogStore } from '@/stores/dailyLog'
   import { useFoodsStore } from '@/stores/foods'
+  import { useAppStore } from '@/stores/app'
+  import { estimateMacros } from '@/services/openai'
   import { emptyMacros } from '@/types'
   import type { FoodItem, MealTemplate } from '@/types'
 
   const dailyLog = useDailyLogStore()
   const foodsStore = useFoodsStore()
+  const appStore = useAppStore()
 
   const dialog = ref(false)
   const tab = ref('manual')
@@ -156,6 +173,20 @@
   const saveAsFood = ref(false)
   const servingSize = ref(100)
   const servingUnit = ref('g')
+
+  // AI estimation
+  const estimating = ref(false)
+
+  async function estimate() {
+    estimating.value = true
+    try {
+      macros.value = await estimateMacros(name.value.trim(), appStore.openaiApiKey)
+    } catch (e: any) {
+      appStore.showSnackbar(e.message || 'Estimation failed', 'error')
+    } finally {
+      estimating.value = false
+    }
+  }
 
   // Foods tab
   const foodSearch = ref('')

@@ -6,6 +6,7 @@ export const useAppStore = defineStore('app', () => {
   const snackbarText = ref('')
   const snackbarColor = ref('success')
   const darkMode = ref(localStorage.getItem('darkMode') === 'true')
+  const openaiApiKey = ref(localStorage.getItem('openaiApiKey') ?? '')
 
   function showSnackbar(text: string, color = 'success') {
     snackbarText.value = text
@@ -18,12 +19,25 @@ export const useAppStore = defineStore('app', () => {
     localStorage.setItem('darkMode', String(darkMode.value))
   }
 
+  function setOpenaiApiKey(key: string) {
+    openaiApiKey.value = key
+    localStorage.setItem('openaiApiKey', key)
+  }
+
+  function clearOpenaiApiKey() {
+    openaiApiKey.value = ''
+    localStorage.removeItem('openaiApiKey')
+  }
+
   return {
     snackbar,
     snackbarText,
     snackbarColor,
     darkMode,
+    openaiApiKey,
     showSnackbar,
     toggleDarkMode,
+    setOpenaiApiKey,
+    clearOpenaiApiKey,
   }
 })
