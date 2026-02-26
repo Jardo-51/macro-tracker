@@ -32,6 +32,9 @@ export async function estimateMacros(foodName: string, apiKey: string): Promise<
     if (response.status === 401) {
       throw new Error('Invalid API key. Check your OpenAI key in Settings.')
     }
+    if (response.status === 429) {
+      throw new Error('Rate limit exceeded. Check your OpenAI billing/quota and try again later.')
+    }
     throw new Error(`OpenAI request failed (${response.status})`)
   }
 
