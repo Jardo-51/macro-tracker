@@ -8,12 +8,10 @@
       <v-text-field
         v-model="keyInput"
         label="OpenAI API key"
-        :type="showKey ? 'text' : 'password'"
+        type="password"
         variant="outlined"
         density="compact"
         hide-details
-        :append-inner-icon="showKey ? 'mdi-eye-off' : 'mdi-eye'"
-        @click:append-inner="showKey = !showKey"
       />
     </v-card-text>
     <v-card-actions>
@@ -44,7 +42,6 @@
 
   const app = useAppStore()
   const keyInput = ref(app.openaiApiKey)
-  const showKey = ref(false)
 
   function saveKey() {
     app.setOpenaiApiKey(keyInput.value.trim())
