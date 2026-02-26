@@ -2,8 +2,8 @@
   <v-container>
     <h1 class="text-h5 mb-4">Settings</h1>
     <ThemeToggle />
-    <AiSettings />
     <GoalsForm />
+    <AiSettings />
     <DataManagement />
     <AboutSection />
   </v-container>
