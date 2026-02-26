@@ -36,7 +36,7 @@
 </template>
 
 <script lang="ts" setup>
-  import { ref, computed, watch } from 'vue'
+  import { ref, computed, watch, onMounted } from 'vue'
   import { Line } from 'vue-chartjs'
   import {
     Chart as ChartJS,
@@ -50,11 +50,13 @@
     Filler,
   } from 'chart.js'
   import { useHistoryStore } from '@/stores/history'
+  import { useDailyLogStore } from '@/stores/dailyLog'
   import { useTheme } from 'vuetify'
 
   ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler)
 
   const store = useHistoryStore()
+  const dailyLogStore = useDailyLogStore()
   const theme = useTheme()
 
   const isDark = computed(() => theme.global.name.value === 'dark')
@@ -79,19 +81,39 @@
     fat: '#FB8C00',
   }
 
+  const goalMap = computed(() => ({
+    calories: dailyLogStore.goals.calories,
+    protein: dailyLogStore.goals.protein,
+    carbs: dailyLogStore.goals.carbsTotal,
+    fat: dailyLogStore.goals.fat,
+  }))
+
   const chartData = computed(() => {
     const trend = store.trendData
+    const dataDatasets = selectedMacros.value.map(key => ({
+      label: key.charAt(0).toUpperCase() + key.slice(1),
+      data: trend[key as keyof typeof trend] as number[],
+      borderColor: colorMap[key],
+      backgroundColor: colorMap[key] + '33',
+      tension: 0.3,
+      fill: false,
+      pointRadius: 3,
+    }))
+    const goalDatasets = selectedMacros.value.map(key => ({
+      label: `${key.charAt(0).toUpperCase() + key.slice(1)} Goal`,
+      data: trend.labels.map(() => goalMap.value[key as keyof typeof goalMap.value]),
+      borderColor: colorMap[key],
+      backgroundColor: 'transparent',
+      borderDash: [6, 4],
+      borderWidth: 1.5,
+      tension: 0,
+      fill: false,
+      pointRadius: 0,
+      pointHoverRadius: 0,
+    }))
     return {
       labels: trend.labels,
-      datasets: selectedMacros.value.map(key => ({
-        label: key.charAt(0).toUpperCase() + key.slice(1),
-        data: trend[key as keyof typeof trend] as number[],
-        borderColor: colorMap[key],
-        backgroundColor: colorMap[key] + '33',
-        tension: 0.3,
-        fill: false,
-        pointRadius: 3,
-      })),
+      datasets: [...dataDatasets, ...goalDatasets],
     }
   })
 
@@ -116,6 +138,10 @@
       },
     },
   }))
+
+  onMounted(() => {
+    dailyLogStore.loadGoals()
+  })
 
   watch(range, (val) => {
     store.loadRangeData(val)
