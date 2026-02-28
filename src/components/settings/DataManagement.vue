@@ -63,6 +63,7 @@
   import { useAppStore } from '@/stores/app'
   import { useDailyLogStore } from '@/stores/dailyLog'
   import type { DailyGoals, DailyLogEntry, FoodItem, MealTemplate } from '@/types'
+  import { toLocalDateStr } from '@/utils/date'
 
   const app = useAppStore()
   const dailyLog = useDailyLogStore()
@@ -192,7 +193,7 @@
     const a = document.createElement('a')
     a.href = url
     const now = new Date()
-    const timestamp = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}_${String(now.getHours()).padStart(2, '0')}-${String(now.getMinutes()).padStart(2, '0')}-${String(now.getSeconds()).padStart(2, '0')}`
+    const timestamp = `${toLocalDateStr(now)}_${String(now.getHours()).padStart(2, '0')}-${String(now.getMinutes()).padStart(2, '0')}-${String(now.getSeconds()).padStart(2, '0')}`
     a.download = `macro-tracker-export-${timestamp}.json`
     a.click()
     URL.revokeObjectURL(url)

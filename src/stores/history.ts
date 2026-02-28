@@ -3,10 +3,7 @@ import { ref, computed } from 'vue'
 import { db } from '@/db'
 import { emptyMacros } from '@/types'
 import type { DailyLogEntry, Macros } from '@/types'
-
-function toLocalDateStr(d: Date): string {
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
-}
+import { toLocalDateStr } from '@/utils/date'
 
 interface DayData {
   date: string
