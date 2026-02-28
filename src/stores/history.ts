@@ -4,6 +4,10 @@ import { db } from '@/db'
 import { emptyMacros } from '@/types'
 import type { DailyLogEntry, Macros } from '@/types'
 
+function toLocalDateStr(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
 interface DayData {
   date: string
   entries: DailyLogEntry[]
@@ -60,7 +64,7 @@ export const useHistoryStore = defineStore('history', () => {
     const start = new Date(startDate + 'T00:00:00')
     const end = new Date(endDate + 'T00:00:00')
     for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-      map.set(d.toISOString().slice(0, 10), [])
+      map.set(toLocalDateStr(d), [])
     }
 
     for (const entry of entries) {
@@ -90,8 +94,8 @@ export const useHistoryStore = defineStore('history', () => {
     const startDate = new Date()
     startDate.setDate(endDate.getDate() - days + 1)
 
-    const startStr = startDate.toISOString().slice(0, 10)
-    const endStr = endDate.toISOString().slice(0, 10)
+    const startStr = toLocalDateStr(startDate)
+    const endStr = toLocalDateStr(endDate)
 
     const entries = await db.dailyLogEntries
       .where('date')
