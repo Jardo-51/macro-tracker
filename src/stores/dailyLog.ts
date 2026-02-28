@@ -5,10 +5,10 @@ import { seedDefaults } from '@/db/seed'
 import { emptyMacros } from '@/types'
 import type { DailyGoals, DailyLogEntry, Macros } from '@/types'
 import { uuidv7 } from 'uuidv7'
-import { toLocalDateStr } from '@/utils/date'
+import { today } from '@/utils/date'
 
 export const useDailyLogStore = defineStore('dailyLog', () => {
-  const currentDate = ref(toLocalDateStr())
+  const currentDate = ref(today())
   const entries = ref<DailyLogEntry[]>([])
   const goals = ref<DailyGoals>({
     id: 'default',
