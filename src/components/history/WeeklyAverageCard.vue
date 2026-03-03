@@ -11,7 +11,7 @@
         >
           <div class="text-center">
             <div class="text-h6" :class="`text-${macro.color}`">
-              {{ store.weeklyAverages[macro.key] }}
+              {{ store.weeklyAverages[macro.key] }} <span class="text-body-2">({{ Math.round((store.weeklyAverages[macro.key] / dailyLogStore.goals[macro.key]) * 100) }}%)</span>
             </div>
             <div class="text-caption text-medium-emphasis">{{ macro.label }}</div>
           </div>
@@ -23,8 +23,10 @@
 
 <script lang="ts" setup>
   import { useHistoryStore } from '@/stores/history'
+  import { useDailyLogStore } from '@/stores/dailyLog'
 
   const store = useHistoryStore()
+  const dailyLogStore = useDailyLogStore()
 
   const macros = [
     { key: 'calories' as const, label: 'Calories', color: 'macro-calories' },
