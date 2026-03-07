@@ -5,11 +5,11 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      redirect: '/today',
+      redirect: '/daily',
     },
     {
-      path: '/today',
-      component: () => import('@/pages/TodayPage.vue'),
+      path: '/daily',
+      component: () => import('@/pages/DailyPage.vue'),
     },
     {
       path: '/history',
