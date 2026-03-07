@@ -1,6 +1,6 @@
 <template>
   <v-card>
-    <v-card-title>Today's Entries</v-card-title>
+    <v-card-title>Entries</v-card-title>
     <v-list v-if="store.entries.length > 0">
       <v-list-item
         v-for="entry in store.entries"
