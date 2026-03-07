@@ -10,7 +10,7 @@ export function today(): string {
 }
 
 export function addDays(dateStr: string, days: number): string {
-  const [y, m, d] = dateStr.split('-').map(Number)
+  const [y, m, d] = dateStr.split('-').map(Number) as [number, number, number]
   const date = new Date(y, m - 1, d)
   date.setDate(date.getDate() + days)
   return toLocalDateStr(date)
@@ -20,7 +20,7 @@ export function formatDisplayDate(dateStr: string): string {
   const todayStr = today()
   if (dateStr === todayStr) return 'Today'
   if (dateStr === addDays(todayStr, -1)) return 'Yesterday'
-  const [y, m, d] = dateStr.split('-').map(Number)
+  const [y, m, d] = dateStr.split('-').map(Number) as [number, number, number]
   const date = new Date(y, m - 1, d)
   return date.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })
 }
