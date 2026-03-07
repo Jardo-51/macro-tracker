@@ -38,6 +38,7 @@
 
   onMounted(async () => {
     await store.loadGoals()
-    await store.loadDate()
+    const dateToLoad = store.currentDate < today() ? today() : undefined
+    await store.loadDate(dateToLoad)
   })
 </script>
