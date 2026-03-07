@@ -1,8 +1,8 @@
 <template>
   <v-bottom-navigation grow>
-    <v-btn to="/today">
-      <v-icon>mdi-calendar-today</v-icon>
-      <span>Today</span>
+    <v-btn to="/daily">
+      <v-icon>mdi-calendar</v-icon>
+      <span>Daily</span>
     </v-btn>
     <v-btn to="/history">
       <v-icon>mdi-chart-line</v-icon>

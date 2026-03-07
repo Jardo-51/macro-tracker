@@ -9,7 +9,8 @@ A progressive web app for tracking daily macronutrient intake. Built with Vue 3,
 - Log food entries via three methods: manual input, saved food items (with adjustable servings), or meal templates
 - View real-time progress bars for calories, protein, carbs, and fat against your daily goals
 - See percentage completion and remaining macros at a glance
-- Delete individual entries from today's log
+- Navigate between days with previous/next buttons to review or edit past entries
+- Delete individual entries from the daily log
 
 ### AI-Powered Macro Estimation
 
@@ -94,7 +95,7 @@ nix develop -c pnpm dev
 src/
 ├── pages/           # Route-level page components
 ├── components/      # UI components organized by feature
-│   ├── today/       # Daily tracking (progress, entries, add dialog)
+│   ├── daily/       # Daily tracking (progress, entries, add dialog, day navigation)
 │   ├── history/     # Charts, averages, daily breakdown
 │   ├── meals/       # Food and meal CRUD
 │   ├── settings/    # Goals, theme, data management, AI config
