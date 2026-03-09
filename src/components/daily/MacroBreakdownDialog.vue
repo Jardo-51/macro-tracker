@@ -14,9 +14,9 @@
             :key="item.id"
             class="mb-3"
           >
-            <div class="d-flex justify-space-between text-body-2 mb-1">
-              <span>{{ item.name }}</span>
-              <span>{{ item.value }}{{ macroUnit }} ({{ Math.round(item.percentage) }}%)</span>
+            <div class="d-flex text-body-2 mb-1" style="gap: 8px">
+              <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; flex: 1">{{ item.name }}</span>
+              <span style="flex-shrink: 0; white-space: nowrap">{{ item.value }}{{ macroUnit }} ({{ Math.round(item.percentage) }}%)</span>
             </div>
             <v-progress-linear
               :model-value="item.percentage"
