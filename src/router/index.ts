@@ -16,6 +16,10 @@ const router = createRouter({
       component: () => import('@/pages/HistoryPage.vue'),
     },
     {
+      path: '/recommend',
+      component: () => import('@/pages/RecommendPage.vue'),
+    },
+    {
       path: '/meals',
       component: () => import('@/pages/MealsPage.vue'),
     },
