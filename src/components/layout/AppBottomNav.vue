@@ -4,6 +4,10 @@
       <v-icon>mdi-calendar</v-icon>
       <span>Daily</span>
     </v-btn>
+    <v-btn to="/recommend">
+      <v-icon>mdi-silverware-fork-knife</v-icon>
+      <span>Recommend</span>
+    </v-btn>
     <v-btn to="/history">
       <v-icon>mdi-chart-line</v-icon>
       <span>History</span>

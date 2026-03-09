@@ -49,6 +49,18 @@ export interface DailySummary {
   entries: DailyLogEntry[]
 }
 
+export interface RecommendedItem {
+  name: string
+  reasoning: string
+  macros: Macros
+}
+
+export interface MenuRecommendation {
+  soup: RecommendedItem | null
+  mainCourse: RecommendedItem
+  combinedMacros: Macros
+}
+
 export function emptyMacros(): Macros {
   return {
     calories: 0,
