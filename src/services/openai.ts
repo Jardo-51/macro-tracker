@@ -93,8 +93,9 @@ export async function recommendFromMenu(
       content:
         'You are a nutrition expert. The user will give you a restaurant menu and their remaining daily macro budget. ' +
         'The menu may contain soups (optional) and main courses. It may be in any language or format. ' +
-        'Recommend the best soup (if soups are available) and main course to help the user meet their remaining macro goals in a healthy, balanced way. ' +
-        'If the remaining budget is very low or negative, recommend the lightest options. ' +
+        'Recommend the best soup (if soups are available) and main course that contribute the most towards filling the remaining macro budget. ' +
+        'Prefer meals that are high in calories and protein to maximize progress towards the daily goal, while still being reasonably healthy. ' +
+        'Only recommend lighter options if the remaining budget is very low or negative. ' +
         'Return a JSON object with this exact shape: ' +
         '{ "soup": { "name": string, "reasoning": string (1-2 sentences), "macros": { "calories": number, "protein": number, "carbsTotal": number, "carbsFiber": number, "carbsSugar": number, "fat": number } } | null, ' +
         '"mainCourse": { "name": string, "reasoning": string (1-2 sentences), "macros": { "calories": number, "protein": number, "carbsTotal": number, "carbsFiber": number, "carbsSugar": number, "fat": number } } }. ' +
