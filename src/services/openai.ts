@@ -97,9 +97,8 @@ export async function recommendFromMenu(
         'If the remaining budget is very low or negative, recommend the lightest options. ' +
         'Return a JSON object with this exact shape: ' +
         '{ "soup": { "name": string, "reasoning": string (1-2 sentences), "macros": { "calories": number, "protein": number, "carbsTotal": number, "carbsFiber": number, "carbsSugar": number, "fat": number } } | null, ' +
-        '"mainCourse": { "name": string, "reasoning": string (1-2 sentences), "macros": { "calories": number, "protein": number, "carbsTotal": number, "carbsFiber": number, "carbsSugar": number, "fat": number } }, ' +
-        '"combinedMacros": { "calories": number, "protein": number, "carbsTotal": number, "carbsFiber": number, "carbsSugar": number, "fat": number } }. ' +
-        'Set "soup" to null if no soups are on the menu. "combinedMacros" should sum the macros of both items (or just mainCourse if soup is null). ' +
+        '"mainCourse": { "name": string, "reasoning": string (1-2 sentences), "macros": { "calories": number, "protein": number, "carbsTotal": number, "carbsFiber": number, "carbsSugar": number, "fat": number } } }. ' +
+        'Set "soup" to null if no soups are on the menu. ' +
         'All macro values should be estimated numbers for a typical restaurant serving.',
     },
     {
@@ -114,7 +113,6 @@ export async function recommendFromMenu(
     throw new Error('Invalid response: missing mainCourse')
   }
   validateMacros(parsed.mainCourse.macros, 'mainCourse')
-  validateMacros(parsed.combinedMacros, 'combinedMacros')
 
   let soup = null
   if (parsed.soup) {
@@ -129,13 +127,24 @@ export async function recommendFromMenu(
     }
   }
 
+  const mainCourse = {
+    name: parsed.mainCourse.name,
+    reasoning: parsed.mainCourse.reasoning || '',
+    macros: roundMacros(parsed.mainCourse.macros),
+  }
+
+  const combinedMacros: Macros = {
+    calories: mainCourse.macros.calories + (soup?.macros.calories ?? 0),
+    protein: mainCourse.macros.protein + (soup?.macros.protein ?? 0),
+    carbsTotal: mainCourse.macros.carbsTotal + (soup?.macros.carbsTotal ?? 0),
+    carbsFiber: mainCourse.macros.carbsFiber + (soup?.macros.carbsFiber ?? 0),
+    carbsSugar: mainCourse.macros.carbsSugar + (soup?.macros.carbsSugar ?? 0),
+    fat: mainCourse.macros.fat + (soup?.macros.fat ?? 0),
+  }
+
   return {
     soup,
-    mainCourse: {
-      name: parsed.mainCourse.name,
-      reasoning: parsed.mainCourse.reasoning || '',
-      macros: roundMacros(parsed.mainCourse.macros),
-    },
-    combinedMacros: roundMacros(parsed.combinedMacros),
+    mainCourse,
+    combinedMacros,
   }
 }
