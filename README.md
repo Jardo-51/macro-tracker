@@ -18,6 +18,13 @@ A progressive web app for tracking daily macronutrient intake. Built with Vue 3,
 - Uses GPT-4o-mini for quick, low-cost estimations
 - API key is stored locally in your browser and never sent to any server other than OpenAI
 
+### Menu Recommendation
+
+- Paste a restaurant menu and get AI-powered recommendations for the best soup and main course to fit your remaining daily macros
+- Shows your remaining macro budget for context
+- Displays estimated macros and reasoning for each recommendation
+- Add recommended items directly to your daily log with one tap
+
 ### Food & Meal Management
 
 - Create a personal library of food items with serving size, unit (g, oz, cup, etc.), and macro values
