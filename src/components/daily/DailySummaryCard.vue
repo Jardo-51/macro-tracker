@@ -51,7 +51,7 @@
   ]
 
   const breakdownDialog = ref(false)
-  const selectedMacro = ref(macros[0])
+  const selectedMacro = ref(macros[0]!)
 
   function openBreakdown(macro: typeof macros[number]) {
     selectedMacro.value = macro
