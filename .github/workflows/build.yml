@@ -17,11 +17,7 @@ jobs:
           github_access_token: ${{ secrets.GITHUB_TOKEN }}
           nix_path: nixpkgs=channel:nixos-25.11
 
-      - name: Cache Nix store
-        uses: nix-community/cache-nix-action@v6
-        with:
-          primary-key: nix-${{ runner.os }}-${{ hashFiles('flake.lock') }}
-          restore-prefixes-first-match: nix-${{ runner.os }}-
+      # I experimented with caching the Nix store but it brought a performance penalty rather than benefit
 
       - name: Cache pnpm store
         uses: actions/cache@v4
