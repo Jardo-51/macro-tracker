@@ -107,7 +107,7 @@
         </v-card-actions>
       </v-card>
 
-      <v-card variant="tonal" class="mb-4">
+      <v-card v-if="recommendation.soup" variant="tonal" class="mb-4">
         <v-card-title class="text-subtitle-1">Combined</v-card-title>
         <v-card-text>
           <div class="d-flex flex-wrap ga-2">
@@ -117,7 +117,7 @@
             <v-chip size="small" color="macro-fat" variant="outlined">{{ recommendation.combinedMacros.fat }}g fat</v-chip>
           </div>
         </v-card-text>
-        <v-card-actions v-if="recommendation.soup">
+        <v-card-actions>
           <v-spacer />
           <v-btn variant="flat" color="primary" @click="addBothToLog">
             Add Both to Daily Log
