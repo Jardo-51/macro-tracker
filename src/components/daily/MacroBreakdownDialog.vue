@@ -11,7 +11,7 @@
         <div v-if="breakdown.length > 0">
           <div
             v-for="item in breakdown"
-            :key="item.name"
+            :key="item.id"
             class="mb-3"
           >
             <div class="d-flex justify-space-between text-body-2 mb-1">
@@ -62,6 +62,7 @@
     if (total === 0) return []
     return store.entries
       .map(entry => ({
+        id: entry.id,
         name: entry.name,
         value: entry.macros[props.macroKey],
         percentage: (entry.macros[props.macroKey] / total) * 100,
