@@ -88,7 +88,8 @@ export const useHistoryStore = defineStore('history', () => {
   async function loadRangeData(days: number) {
     selectedRange.value = days
     const endDate = new Date()
-    const startDate = new Date()
+    endDate.setDate(endDate.getDate() - 1) // exclude today (incomplete data)
+    const startDate = new Date(endDate)
     startDate.setDate(endDate.getDate() - days + 1)
 
     const startStr = toLocalDateStr(startDate)
