@@ -8,6 +8,7 @@ A progressive web app for tracking daily macronutrient intake. Built with Vue 3,
 
 - Log food entries via three methods: manual input, saved food items (with adjustable servings), or meal templates
 - View real-time progress bars for calories, protein, carbs, and fat against your daily goals
+- Click any macro progress bar to see a breakdown of which foods contributed what percentage, sorted by contribution
 - See percentage completion and remaining macros at a glance
 - Navigate between days with previous/next buttons to review or edit past entries
 - Delete individual entries from the daily log

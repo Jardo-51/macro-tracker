@@ -7,34 +7,54 @@
       <div
         v-for="macro in macros"
         :key="macro.key"
-        class="mb-3"
+        v-ripple
+        class="mb-3 rounded"
+        style="cursor: pointer; padding: 4px; margin: -4px"
+        @click="openBreakdown(macro)"
       >
         <div class="d-flex justify-space-between text-body-2 mb-1">
           <span>{{ macro.label }}</span>
           <span>
-            {{ store.dailyTotals[macro.key] }}{{ macro.unit }} / {{ store.goals[macro.goalKey] }}{{ macro.unit }} ({{ Math.round(store.progressPercentages[macro.goalKey]) }}%)
+            {{ store.dailyTotals[macro.key] }}{{ macro.unit }} / {{ store.goals[macro.key] }}{{ macro.unit }} ({{ Math.round(store.progressPercentages[macro.key]) }}%)
           </span>
         </div>
         <v-progress-linear
-          :model-value="Math.min(100, store.progressPercentages[macro.goalKey])"
+          :model-value="Math.min(100, store.progressPercentages[macro.key])"
           :color="macro.color"
           height="12"
           rounded
         />
       </div>
     </v-card-text>
+    <MacroBreakdownDialog
+      v-model="breakdownDialog"
+      :macro-key="selectedMacro.key"
+      :macro-label="selectedMacro.label"
+      :macro-color="selectedMacro.color"
+      :macro-unit="selectedMacro.unit"
+    />
   </v-card>
 </template>
 
 <script lang="ts" setup>
+  import { ref } from 'vue'
   import { useDailyLogStore } from '@/stores/dailyLog'
+  import MacroBreakdownDialog from './MacroBreakdownDialog.vue'
 
   const store = useDailyLogStore()
 
   const macros = [
-    { key: 'calories' as const, goalKey: 'calories' as const, label: 'Calories', unit: ' kcal', color: 'macro-calories' },
-    { key: 'protein' as const, goalKey: 'protein' as const, label: 'Protein', unit: 'g', color: 'macro-protein' },
-    { key: 'carbsTotal' as const, goalKey: 'carbsTotal' as const, label: 'Carbs', unit: 'g', color: 'macro-carbs' },
-    { key: 'fat' as const, goalKey: 'fat' as const, label: 'Fat', unit: 'g', color: 'macro-fat' },
+    { key: 'calories' as const, label: 'Calories', unit: ' kcal', color: 'macro-calories' },
+    { key: 'protein' as const, label: 'Protein', unit: 'g', color: 'macro-protein' },
+    { key: 'carbsTotal' as const, label: 'Carbs', unit: 'g', color: 'macro-carbs' },
+    { key: 'fat' as const, label: 'Fat', unit: 'g', color: 'macro-fat' },
   ]
+
+  const breakdownDialog = ref(false)
+  const selectedMacro = ref(macros[0]!)
+
+  function openBreakdown(macro: typeof macros[number]) {
+    selectedMacro.value = macro
+    breakdownDialog.value = true
+  }
 </script>
