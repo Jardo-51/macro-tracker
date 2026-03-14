@@ -19,7 +19,7 @@
               <span style="flex-shrink: 0; white-space: nowrap">{{ item.value }}{{ macroUnit }} ({{ Math.round(item.percentage) }}%)</span>
             </div>
             <v-progress-linear
-              :model-value="item.percentage"
+              :model-value="Math.min(100, item.percentage)"
               :color="macroColor"
               height="8"
               rounded
