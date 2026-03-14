@@ -1,4 +1,4 @@
-import type { Macros, MenuRecommendation } from '@/types'
+import type { Macros, MenuRecommendation, SnackSuggestion } from '@/types'
 
 interface ChatMessage {
   role: 'system' | 'user'
@@ -148,4 +148,42 @@ export async function recommendFromMenu(
     mainCourse,
     combinedMacros,
   }
+}
+
+export async function suggestSnacks(
+  remainingMacros: { calories: number; protein: number; carbsTotal: number; fat: number },
+  apiKey: string,
+): Promise<SnackSuggestion[]> {
+  const parsed = await chatCompletion([
+    {
+      role: 'system',
+      content:
+        'You are a nutrition expert. The user will give you their remaining daily macro budget. ' +
+        'Suggest 3 to 5 healthy snacks that would help them reach their goals for the day. ' +
+        'Prefer snacks that are high in protein and fill the remaining calorie budget without going too far over. ' +
+        'Return a JSON object with a single key "snacks" whose value is an array. ' +
+        'Each element must have: "name" (string), "reasoning" (string, 1-2 sentences that MUST start with the specific portion size the macros are estimated for), and "macros" ({ "calories": number, "protein": number, "carbsTotal": number, "carbsFiber": number, "carbsSugar": number, "fat": number }). ' +
+        'All macro values should be realistic estimates for the stated portion size.',
+    },
+    {
+      role: 'user',
+      content: `Remaining daily macros: ${remainingMacros.calories} kcal, ${remainingMacros.protein}g protein, ${remainingMacros.carbsTotal}g carbs, ${remainingMacros.fat}g fat.`,
+    },
+  ], apiKey)
+
+  if (!Array.isArray(parsed.snacks) || parsed.snacks.length === 0) {
+    throw new Error('Invalid response: missing snacks array')
+  }
+
+  return parsed.snacks.map((s: any, i: number) => {
+    if (typeof s.name !== 'string') {
+      throw new Error(`Invalid response: snack ${i} missing name`)
+    }
+    validateMacros(s.macros, `snack "${s.name}"`)
+    return {
+      name: s.name,
+      reasoning: s.reasoning || '',
+      macros: roundMacros(s.macros),
+    } satisfies SnackSuggestion
+  })
 }

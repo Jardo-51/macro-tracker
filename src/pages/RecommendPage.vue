@@ -44,6 +44,18 @@
       Get Recommendation
     </v-btn>
 
+    <v-btn
+      color="secondary"
+      variant="flat"
+      block
+      :loading="snacksLoading"
+      :disabled="!app.openaiApiKey"
+      class="mb-4"
+      @click="getSnackSuggestions"
+    >
+      Suggest Healthy Snacks
+    </v-btn>
+
     <v-alert
       v-if="!app.openaiApiKey"
       type="info"
@@ -125,6 +137,28 @@
         </v-card-actions>
       </v-card>
     </template>
+
+    <template v-if="snacks.length > 0">
+      <h2 class="text-subtitle-1 font-weight-bold mb-3">Suggested Snacks</h2>
+      <v-card v-for="snack in snacks" :key="snack.name" class="mb-4">
+        <v-card-title class="text-body-1">{{ snack.name }}</v-card-title>
+        <v-card-text>
+          <div class="d-flex flex-wrap ga-2 mb-2">
+            <v-chip size="x-small" color="macro-calories" variant="tonal">{{ snack.macros.calories }} kcal</v-chip>
+            <v-chip size="x-small" color="macro-protein" variant="tonal">{{ snack.macros.protein }}g protein</v-chip>
+            <v-chip size="x-small" color="macro-carbs" variant="tonal">{{ snack.macros.carbsTotal }}g carbs</v-chip>
+            <v-chip size="x-small" color="macro-fat" variant="tonal">{{ snack.macros.fat }}g fat</v-chip>
+          </div>
+          <p class="text-body-2 text-medium-emphasis">{{ snack.reasoning }}</p>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer />
+          <v-btn variant="text" color="primary" @click="addToLog(snack)">
+            Add to Daily Log
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </template>
   </v-container>
 </template>
 
@@ -132,18 +166,20 @@
   import { ref, onMounted } from 'vue'
   import { useDailyLogStore } from '@/stores/dailyLog'
   import { useAppStore } from '@/stores/app'
-  import { recommendFromMenu } from '@/services/openai'
+  import { recommendFromMenu, suggestSnacks } from '@/services/openai'
   import { today } from '@/utils/date'
   import { emptyMacros } from '@/types'
-  import type { MenuRecommendation, RecommendedItem } from '@/types'
+  import type { MenuRecommendation, RecommendedItem, SnackSuggestion } from '@/types'
 
   const dailyLog = useDailyLogStore()
   const app = useAppStore()
 
   const menuText = ref('')
   const loading = ref(false)
+  const snacksLoading = ref(false)
   const error = ref('')
   const recommendation = ref<MenuRecommendation | null>(null)
+  const snacks = ref<SnackSuggestion[]>([])
 
   onMounted(async () => {
     await dailyLog.loadGoals()
@@ -168,7 +204,20 @@
     }
   }
 
-  async function addToLog(item: RecommendedItem) {
+  async function getSnackSuggestions() {
+    snacksLoading.value = true
+    error.value = ''
+    snacks.value = []
+    try {
+      snacks.value = await suggestSnacks(dailyLog.remainingMacros, app.openaiApiKey)
+    } catch (e: any) {
+      error.value = e.message || 'Failed to get snack suggestions'
+    } finally {
+      snacksLoading.value = false
+    }
+  }
+
+  async function addToLog(item: RecommendedItem | SnackSuggestion) {
     await dailyLog.addEntry({
       date: dailyLog.currentDate,
       name: item.name,

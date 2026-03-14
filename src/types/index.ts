@@ -61,6 +61,12 @@ export interface MenuRecommendation {
   combinedMacros: Macros
 }
 
+export interface SnackSuggestion {
+  name: string
+  reasoning: string
+  macros: Macros
+}
+
 export function emptyMacros(): Macros {
   return {
     calories: 0,
