@@ -26,6 +26,12 @@ A progressive web app for tracking daily macronutrient intake. Built with Vue 3,
 - Displays estimated macros and reasoning for each recommendation
 - Add recommended items directly to your daily log with one tap
 
+### Snack Suggestions
+
+- Get AI-powered healthy snack suggestions based on your remaining daily macro budget
+- Each suggestion includes portion size, estimated macros, and reasoning for why it fits your goals
+- Add any suggested snack directly to your daily log with one tap
+
 ### Food & Meal Management
 
 - Create a personal library of food items with serving size, unit (g, oz, cup, etc.), and macro values
