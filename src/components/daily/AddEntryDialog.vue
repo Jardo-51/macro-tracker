@@ -26,19 +26,11 @@
                 density="compact"
                 hide-details
               />
-              <v-btn
-                v-if="appStore.openaiApiKey"
-                icon
-                size="small"
-                variant="tonal"
-                color="primary"
+              <AiEstimateButton
                 :disabled="!name.trim()"
-                :loading="estimating"
-                @click="estimate"
-              >
-                <v-icon>mdi-auto-fix</v-icon>
-                <v-tooltip activator="parent" location="top">Estimate macros with AI</v-tooltip>
-              </v-btn>
+                :estimating="estimating"
+                @click="estimate(name.trim(), m => (macros = m))"
+              />
             </div>
             <MacroInputFields v-model="macros" />
             <div class="d-flex align-center mt-3 mb-1" style="gap: 8px">
@@ -174,16 +166,18 @@
 <script lang="ts" setup>
   import { ref, computed, watch } from 'vue'
   import MacroInputFields from './MacroInputFields.vue'
+  import AiEstimateButton from './AiEstimateButton.vue'
   import { useDailyLogStore } from '@/stores/dailyLog'
   import { useFoodsStore } from '@/stores/foods'
   import { useAppStore } from '@/stores/app'
-  import { estimateMacros } from '@/services/openai'
+  import { useEstimateMacros } from '@/composables/useEstimateMacros'
   import { emptyMacros } from '@/types'
   import type { FoodItem, MealTemplate } from '@/types'
 
   const dailyLog = useDailyLogStore()
   const foodsStore = useFoodsStore()
   const appStore = useAppStore()
+  const { estimating, estimate } = useEstimateMacros()
 
   const dialog = ref(false)
   const tab = ref('manual')
@@ -197,20 +191,6 @@
   function applyMultiplier() {
     macros.value = multiplyMacros(macros.value, multiplier.value)
     multiplier.value = 1
-  }
-
-  // AI estimation
-  const estimating = ref(false)
-
-  async function estimate() {
-    estimating.value = true
-    try {
-      macros.value = await estimateMacros(name.value.trim(), appStore.openaiApiKey)
-    } catch (e: any) {
-      appStore.showSnackbar(e.message || 'Estimation failed', 'error')
-    } finally {
-      estimating.value = false
-    }
   }
 
   // Foods tab

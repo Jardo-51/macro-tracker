@@ -11,19 +11,11 @@
             density="compact"
             hide-details
           />
-          <v-btn
-            v-if="appStore.openaiApiKey"
-            icon
-            size="small"
-            variant="tonal"
-            color="primary"
+          <AiEstimateButton
             :disabled="!name.trim()"
-            :loading="estimating"
-            @click="estimate"
-          >
-            <v-icon>mdi-auto-fix</v-icon>
-            <v-tooltip activator="parent" location="top">Estimate macros with AI</v-tooltip>
-          </v-btn>
+            :estimating="estimating"
+            @click="estimate(name.trim(), m => (macros = m))"
+          />
         </div>
         <MacroInputFields v-model="macros" />
         <div class="d-flex align-center mt-3 mb-1" style="gap: 8px">
@@ -58,14 +50,14 @@
 <script lang="ts" setup>
   import { ref, computed } from 'vue'
   import MacroInputFields from './MacroInputFields.vue'
+  import AiEstimateButton from './AiEstimateButton.vue'
   import { useDailyLogStore } from '@/stores/dailyLog'
-  import { useAppStore } from '@/stores/app'
-  import { estimateMacros } from '@/services/openai'
+  import { useEstimateMacros } from '@/composables/useEstimateMacros'
   import { emptyMacros } from '@/types'
   import type { DailyLogEntry } from '@/types'
 
   const dailyLog = useDailyLogStore()
-  const appStore = useAppStore()
+  const { estimating, estimate } = useEstimateMacros()
 
   const dialog = ref(false)
   const editingId = ref('')
@@ -74,19 +66,6 @@
   const multiplier = ref(1)
 
   const canSave = computed(() => !!name.value.trim())
-
-  const estimating = ref(false)
-
-  async function estimate() {
-    estimating.value = true
-    try {
-      macros.value = await estimateMacros(name.value.trim(), appStore.openaiApiKey)
-    } catch (e: any) {
-      appStore.showSnackbar(e.message || 'Estimation failed', 'error')
-    } finally {
-      estimating.value = false
-    }
-  }
 
   function open(entry: DailyLogEntry) {
     editingId.value = entry.id
