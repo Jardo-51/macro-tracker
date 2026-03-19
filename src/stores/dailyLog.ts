@@ -89,6 +89,15 @@ export const useDailyLogStore = defineStore('dailyLog', () => {
     entries.value = entries.value.filter(e => e.id !== id)
   }
 
+  async function updateEntry(id: string, changes: Pick<DailyLogEntry, 'name' | 'macros' | 'servings'>) {
+    const existing = entries.value.find(e => e.id === id)
+    if (!existing) return
+    const updated: DailyLogEntry = { ...existing, ...changes }
+    await db.dailyLogEntries.put(updated)
+    const idx = entries.value.findIndex(e => e.id === id)
+    if (idx !== -1) entries.value[idx] = updated
+  }
+
   return {
     currentDate,
     entries,
@@ -102,5 +111,6 @@ export const useDailyLogStore = defineStore('dailyLog', () => {
     loadDate,
     addEntry,
     removeEntry,
+    updateEntry,
   }
 })

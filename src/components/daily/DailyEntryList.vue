@@ -21,6 +21,12 @@
         </v-list-item-subtitle>
         <template #append>
           <v-btn
+            icon="mdi-pencil-outline"
+            variant="text"
+            size="small"
+            @click="editDialog?.open(entry)"
+          />
+          <v-btn
             icon="mdi-delete-outline"
             variant="text"
             size="small"
@@ -33,12 +39,17 @@
       No entries yet. Tap + to add food.
     </v-card-text>
   </v-card>
+
+  <EditEntryDialog ref="editDialog" />
 </template>
 
 <script lang="ts" setup>
+  import { ref } from 'vue'
   import { useDailyLogStore } from '@/stores/dailyLog'
+  import EditEntryDialog from './EditEntryDialog.vue'
 
   const store = useDailyLogStore()
+  const editDialog = ref<InstanceType<typeof EditEntryDialog> | null>(null)
 
   function sourceIcon(type: string) {
     switch (type) {
