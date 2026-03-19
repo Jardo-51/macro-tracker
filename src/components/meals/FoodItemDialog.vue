@@ -35,6 +35,25 @@
         </v-row>
         <p class="text-body-2 text-medium-emphasis mb-2">Macros per serving</p>
         <MacroInputFields v-model="form.macros" />
+        <div class="d-flex align-center mt-3 mb-1" style="gap: 8px">
+          <v-text-field
+            v-model.number="multiplier"
+            label="Multiplier"
+            type="number"
+            density="compact"
+            variant="outlined"
+            hide-details
+            style="max-width: 140px"
+          />
+          <v-btn
+            variant="tonal"
+            size="small"
+            :disabled="multiplier === 1"
+            @click="applyMultiplier"
+          >
+            Apply
+          </v-btn>
+        </div>
       </v-card-text>
       <v-card-actions>
         <v-spacer />
@@ -64,6 +83,22 @@
   const editId = ref('')
   const editCreatedAt = ref('')
 
+  const multiplier = ref(1)
+
+  function applyMultiplier() {
+    const m = form.macros
+    form.macros = {
+      calories: m.calories * multiplier.value,
+      protein: m.protein * multiplier.value,
+      carbsTotal: m.carbsTotal * multiplier.value,
+      carbsFiber: m.carbsFiber * multiplier.value,
+      carbsSugar: m.carbsSugar * multiplier.value,
+      fat: m.fat * multiplier.value,
+    }
+    form.servingSize = form.servingSize * multiplier.value
+    multiplier.value = 1
+  }
+
   const form = reactive({
     name: '',
     servingSize: 100,
@@ -87,6 +122,7 @@
       form.servingUnit = 'g'
       form.macros = emptyMacros()
     }
+    if (open) multiplier.value = 1
   })
 
   async function save() {

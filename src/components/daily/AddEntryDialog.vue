@@ -41,6 +41,25 @@
               </v-btn>
             </div>
             <MacroInputFields v-model="macros" />
+            <div class="d-flex align-center mt-3 mb-1" style="gap: 8px">
+              <v-text-field
+                v-model.number="multiplier"
+                label="Multiplier"
+                type="number"
+                density="compact"
+                variant="outlined"
+                hide-details
+                style="max-width: 140px"
+              />
+              <v-btn
+                variant="tonal"
+                size="small"
+                :disabled="multiplier === 1"
+                @click="applyMultiplier"
+              >
+                Apply
+              </v-btn>
+            </div>
             <v-checkbox
               v-model="saveAsFood"
               label="Save as custom food"
@@ -173,6 +192,12 @@
   const saveAsFood = ref(false)
   const servingSize = ref(100)
   const servingUnit = ref('g')
+  const multiplier = ref(1)
+
+  function applyMultiplier() {
+    macros.value = multiplyMacros(macros.value, multiplier.value)
+    multiplier.value = 1
+  }
 
   // AI estimation
   const estimating = ref(false)
@@ -233,12 +258,12 @@
 
   function multiplyMacros(m: typeof macros.value, factor: number) {
     return {
-      calories: Math.round(m.calories * factor),
-      protein: Math.round(m.protein * factor),
-      carbsTotal: Math.round(m.carbsTotal * factor),
-      carbsFiber: Math.round(m.carbsFiber * factor),
-      carbsSugar: Math.round(m.carbsSugar * factor),
-      fat: Math.round(m.fat * factor),
+      calories: m.calories * factor,
+      protein: m.protein * factor,
+      carbsTotal: m.carbsTotal * factor,
+      carbsFiber: m.carbsFiber * factor,
+      carbsSugar: m.carbsSugar * factor,
+      fat: m.fat * factor,
     }
   }
 
@@ -290,6 +315,7 @@
     saveAsFood.value = false
     servingSize.value = 100
     servingUnit.value = 'g'
+    multiplier.value = 1
     tab.value = 'manual'
     selectedFood.value = null
     selectedMeal.value = null
