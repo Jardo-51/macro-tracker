@@ -56,7 +56,7 @@
   const macros = ref(emptyMacros())
   const multiplier = ref(1)
 
-  const canSave = computed(() => name.value.trim() && macros.value.calories > 0)
+  const canSave = computed(() => !!name.value.trim())
 
   function open(entry: DailyLogEntry) {
     editingId.value = entry.id

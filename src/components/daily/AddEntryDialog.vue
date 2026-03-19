@@ -235,7 +235,7 @@
   })
 
   const canSave = computed(() => {
-    if (tab.value === 'manual') return name.value.trim() && macros.value.calories > 0
+    if (tab.value === 'manual') return !!name.value.trim()
     if (tab.value === 'foods') return selectedFood.value && foodServings.value > 0
     if (tab.value === 'meals') return selectedMeal.value
     return false
