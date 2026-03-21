@@ -88,14 +88,14 @@
   function applyMultiplier() {
     const m = form.macros
     form.macros = {
-      calories: m.calories * multiplier.value,
-      protein: m.protein * multiplier.value,
-      carbsTotal: m.carbsTotal * multiplier.value,
-      carbsFiber: m.carbsFiber * multiplier.value,
-      carbsSugar: m.carbsSugar * multiplier.value,
-      fat: m.fat * multiplier.value,
+      calories: Math.round(m.calories * multiplier.value),
+      protein: Math.round(m.protein * multiplier.value),
+      carbsTotal: Math.round(m.carbsTotal * multiplier.value),
+      carbsFiber: Math.round(m.carbsFiber * multiplier.value),
+      carbsSugar: Math.round(m.carbsSugar * multiplier.value),
+      fat: Math.round(m.fat * multiplier.value),
     }
-    form.servingSize = form.servingSize * multiplier.value
+    form.servingSize = Math.round(form.servingSize * multiplier.value)
     multiplier.value = 1
   }
 

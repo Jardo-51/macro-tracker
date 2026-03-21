@@ -238,12 +238,12 @@
 
   function multiplyMacros(m: typeof macros.value, factor: number) {
     return {
-      calories: m.calories * factor,
-      protein: m.protein * factor,
-      carbsTotal: m.carbsTotal * factor,
-      carbsFiber: m.carbsFiber * factor,
-      carbsSugar: m.carbsSugar * factor,
-      fat: m.fat * factor,
+      calories: Math.round(m.calories * factor),
+      protein: Math.round(m.protein * factor),
+      carbsTotal: Math.round(m.carbsTotal * factor),
+      carbsFiber: Math.round(m.carbsFiber * factor),
+      carbsSugar: Math.round(m.carbsSugar * factor),
+      fat: Math.round(m.fat * factor),
     }
   }
 
