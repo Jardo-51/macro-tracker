@@ -7,16 +7,16 @@
       <v-card-text>
         <div class="d-flex justify-space-between flex-wrap ga-2">
           <v-chip size="small" color="macro-calories" variant="tonal">
-            {{ dailyLog.remainingMacros.calories }} kcal
+            {{ Math.round(dailyLog.remainingMacros.calories) }} kcal
           </v-chip>
           <v-chip size="small" color="macro-protein" variant="tonal">
-            {{ dailyLog.remainingMacros.protein }}g protein
+            {{ Math.round(dailyLog.remainingMacros.protein) }}g protein
           </v-chip>
           <v-chip size="small" color="macro-carbs" variant="tonal">
-            {{ dailyLog.remainingMacros.carbsTotal }}g carbs
+            {{ Math.round(dailyLog.remainingMacros.carbsTotal) }}g carbs
           </v-chip>
           <v-chip size="small" color="macro-fat" variant="tonal">
-            {{ dailyLog.remainingMacros.fat }}g fat
+            {{ Math.round(dailyLog.remainingMacros.fat) }}g fat
           </v-chip>
         </div>
       </v-card-text>
