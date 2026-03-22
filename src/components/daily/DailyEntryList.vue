@@ -71,3 +71,9 @@
     await store.removeEntry(id)
   }
 </script>
+
+<style scoped>
+:deep(.v-list-item__spacer) {
+  width: 16px;
+}
+</style>
