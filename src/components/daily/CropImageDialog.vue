@@ -104,7 +104,11 @@
       releaseBitmap()
       return
     }
-    if (props.file) await loadFile(props.file)
+    if (!props.file) {
+      open.value = false
+      return
+    }
+    await loadFile(props.file)
   })
 
   async function loadFile(file: File) {
