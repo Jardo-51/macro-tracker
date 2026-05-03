@@ -165,8 +165,8 @@
     startY = e.clientY
     startRect = { x: rect.x, y: rect.y, w: rect.w, h: rect.h }
     window.addEventListener('pointermove', onMove)
-    window.addEventListener('pointerup', onEnd, { once: true })
-    window.addEventListener('pointercancel', onEnd, { once: true })
+    window.addEventListener('pointerup', onEnd)
+    window.addEventListener('pointercancel', onEnd)
   }
 
   function onMove(e: PointerEvent) {
@@ -206,12 +206,14 @@
   function onEnd() {
     mode = ''
     window.removeEventListener('pointermove', onMove)
+    window.removeEventListener('pointerup', onEnd)
+    window.removeEventListener('pointercancel', onEnd)
   }
 
   onBeforeUnmount(() => {
     observer?.disconnect()
     releaseBitmap()
-    window.removeEventListener('pointermove', onMove)
+    onEnd()
   })
 
   async function apply() {
