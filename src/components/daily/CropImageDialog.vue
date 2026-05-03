@@ -7,14 +7,7 @@
           Drag inside the box to move it. Drag the corners to resize.
         </p>
         <div class="crop-container">
-          <img
-            ref="imgEl"
-            :src="props.imageDataUrl"
-            class="crop-img"
-            draggable="false"
-            @load="onImageLoad"
-            @error="onImageError"
-          >
+          <canvas ref="canvasEl" class="crop-canvas" />
           <template v-if="ready">
             <div class="crop-mask" :style="topMask" />
             <div class="crop-mask" :style="bottomMask" />
@@ -43,18 +36,20 @@
 </template>
 
 <script lang="ts" setup>
-  import { ref, reactive, computed, watch, onBeforeUnmount } from 'vue'
+  import { ref, reactive, computed, watch, nextTick, onBeforeUnmount } from 'vue'
   import { useAppStore } from '@/stores/app'
 
-  const props = defineProps<{ imageDataUrl: string }>()
+  const props = defineProps<{ file: File | null }>()
   const open = defineModel<boolean>({ default: false })
   const emit = defineEmits<{ cropped: [imageDataUrl: string] }>()
 
   const appStore = useAppStore()
-  const imgEl = ref<HTMLImageElement | null>(null)
-  const loaded = ref(false)
+  const canvasEl = ref<HTMLCanvasElement | null>(null)
+  const ready = ref(false)
   const imgW = ref(0)
   const imgH = ref(0)
+  const naturalW = ref(0)
+  const naturalH = ref(0)
 
   const rect = reactive({ x: 0, y: 0, w: 1, h: 1 })
 
@@ -63,10 +58,9 @@
   let startY = 0
   let startRect = { x: 0, y: 0, w: 0, h: 0 }
   const MIN_PX = 24
+  const MAX_EDGE = 1024
 
   let observer: ResizeObserver | null = null
-
-  const ready = computed(() => loaded.value && imgW.value > 0 && imgH.value > 0)
 
   const rectStyle = computed(() => ({
     left: rect.x * imgW.value + 'px',
@@ -99,41 +93,65 @@
     height: rect.h * imgH.value + 'px',
   }))
 
-  watch(() => props.imageDataUrl, () => {
-    loaded.value = false
-    imgW.value = 0
-    imgH.value = 0
+  watch(open, async (isOpen) => {
+    if (!isOpen) {
+      ready.value = false
+      observer?.disconnect()
+      return
+    }
+    if (props.file) await loadFile(props.file)
+  })
+
+  async function loadFile(file: File) {
+    ready.value = false
+    let bitmap: ImageBitmap
+    try {
+      bitmap = await createImageBitmap(file)
+    } catch {
+      appStore.showSnackbar('Could not read image', 'error')
+      open.value = false
+      return
+    }
+    const longest = Math.max(bitmap.width, bitmap.height)
+    const scale = longest > MAX_EDGE ? MAX_EDGE / longest : 1
+    const w = Math.round(bitmap.width * scale)
+    const h = Math.round(bitmap.height * scale)
+
+    await nextTick()
+    const canvas = canvasEl.value
+    if (!canvas) {
+      bitmap.close?.()
+      return
+    }
+    canvas.width = w
+    canvas.height = h
+    const ctx = canvas.getContext('2d')
+    if (!ctx) {
+      bitmap.close?.()
+      return
+    }
+    ctx.drawImage(bitmap, 0, 0, w, h)
+    bitmap.close?.()
+
+    naturalW.value = w
+    naturalH.value = h
     rect.x = 0
     rect.y = 0
     rect.w = 1
     rect.h = 1
-  })
+    attachObserver(canvas)
+    ready.value = true
+  }
 
-  function attachObserver(img: HTMLImageElement) {
+  function attachObserver(canvas: HTMLCanvasElement) {
     observer?.disconnect()
     const sync = () => {
-      imgW.value = img.clientWidth
-      imgH.value = img.clientHeight
+      imgW.value = canvas.clientWidth
+      imgH.value = canvas.clientHeight
     }
     sync()
     observer = new ResizeObserver(sync)
-    observer.observe(img)
-  }
-
-  function onImageLoad() {
-    const img = imgEl.value
-    if (!img) return
-    rect.x = 0
-    rect.y = 0
-    rect.w = 1
-    rect.h = 1
-    loaded.value = true
-    attachObserver(img)
-  }
-
-  function onImageError() {
-    appStore.showSnackbar('Could not load image for cropping', 'error')
-    open.value = false
+    observer.observe(canvas)
   }
 
   function clamp(v: number, min: number, max: number) {
@@ -196,22 +214,22 @@
   })
 
   async function apply() {
-    const img = imgEl.value
-    if (!img || !ready.value) return
-    const sx = Math.round(rect.x * img.naturalWidth)
-    const sy = Math.round(rect.y * img.naturalHeight)
-    const sw = Math.max(1, Math.round(rect.w * img.naturalWidth))
-    const sh = Math.max(1, Math.round(rect.h * img.naturalHeight))
+    const canvas = canvasEl.value
+    if (!canvas || !ready.value) return
+    const sx = Math.round(rect.x * naturalW.value)
+    const sy = Math.round(rect.y * naturalH.value)
+    const sw = Math.max(1, Math.round(rect.w * naturalW.value))
+    const sh = Math.max(1, Math.round(rect.h * naturalH.value))
 
-    const canvas = document.createElement('canvas')
-    canvas.width = sw
-    canvas.height = sh
-    const ctx = canvas.getContext('2d')
+    const out = document.createElement('canvas')
+    out.width = sw
+    out.height = sh
+    const ctx = out.getContext('2d')
     if (!ctx) return
-    ctx.drawImage(img, sx, sy, sw, sh, 0, 0, sw, sh)
+    ctx.drawImage(canvas, sx, sy, sw, sh, 0, 0, sw, sh)
 
     const blob: Blob = await new Promise((resolve, reject) => {
-      canvas.toBlob(
+      out.toBlob(
         (b) => (b ? resolve(b) : reject(new Error('Crop failed'))),
         'image/jpeg',
         0.85,
@@ -242,11 +260,10 @@
   touch-action: none;
   line-height: 0;
 }
-.crop-img {
+.crop-canvas {
   display: block;
-  width: 100%;
+  max-width: 100%;
   height: auto;
-  -webkit-user-drag: none;
 }
 .crop-mask {
   position: absolute;

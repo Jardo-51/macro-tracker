@@ -22,7 +22,7 @@
     >
     <CropImageDialog
       v-model="cropOpen"
-      :image-data-url="pendingDataUrl"
+      :file="pendingFile"
       @cropped="onCropped"
     />
   </template>
@@ -31,7 +31,6 @@
 <script lang="ts" setup>
   import { ref } from 'vue'
   import { useAppStore } from '@/stores/app'
-  import { resizeAndEncodeImage } from '@/utils/imageResize'
   import CropImageDialog from './CropImageDialog.vue'
 
   defineProps<{ disabled: boolean; extracting: boolean }>()
@@ -40,23 +39,19 @@
   const appStore = useAppStore()
   const fileInput = ref<HTMLInputElement | null>(null)
   const cropOpen = ref(false)
-  const pendingDataUrl = ref('')
+  const pendingFile = ref<File | null>(null)
 
   function openPicker() {
     fileInput.value?.click()
   }
 
-  async function onFileChange(e: Event) {
+  function onFileChange(e: Event) {
     const input = e.target as HTMLInputElement
-    const file = input.files?.[0]
+    const file = input.files?.[0] ?? null
     input.value = ''
     if (!file) return
-    try {
-      pendingDataUrl.value = await resizeAndEncodeImage(file)
-      cropOpen.value = true
-    } catch (err: any) {
-      appStore.showSnackbar(err?.message || 'Could not read image', 'error')
-    }
+    pendingFile.value = file
+    cropOpen.value = true
   }
 
   function onCropped(dataUrl: string) {
