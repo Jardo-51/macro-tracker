@@ -233,7 +233,9 @@ export async function extractMacrosFromLabelImage(
     throw new Error(`Couldn't read label: ${parsed.error}. Try better lighting or a closer shot.`)
   }
 
-  validateMacros(parsed, 'label')
+  for (const field of MACRO_FIELDS) {
+    if (typeof parsed[field] !== 'number') parsed[field] = 0
+  }
   const result: LabelExtractResult = { macros: roundMacros(parsed) }
   if (typeof parsed.servingSize === 'number' && parsed.servingSize > 0) {
     result.servingSize = Math.round(parsed.servingSize)
