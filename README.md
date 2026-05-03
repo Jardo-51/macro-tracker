@@ -19,6 +19,14 @@ A progressive web app for tracking daily macronutrient intake. Built with Vue 3,
 - Uses GPT-4o-mini for quick, low-cost estimations
 - API key is stored locally in your browser and never sent to any server other than OpenAI
 
+### Nutrition Label Scan
+
+- Take a picture of a food product's nutrition label (or pick an existing photo) from the Add Entry and New/Edit Food dialogs
+- GPT-4o-mini vision reads the label and auto-fills calories, protein, carbs, sugar, fiber, and fat
+- Handles US and EU layouts, kJ→kcal conversion, per-100g vs per-serving columns, and non-English labels
+- Also fills serving size and unit when readable on the label
+- Image is resized to 1024px client-side before being sent to keep cost and bandwidth low
+
 ### Menu Recommendation
 
 - Paste a restaurant menu and get AI-powered recommendations for the best soup and main course to fit your remaining daily macros

@@ -3,14 +3,19 @@
     <v-card>
       <v-card-title>{{ isEdit ? 'Edit Food' : 'New Food' }}</v-card-title>
       <v-card-text>
-        <v-text-field
-          v-model="form.name"
-          label="Food name"
-          variant="outlined"
-          density="compact"
-          class="mb-2"
-          hide-details
-        />
+        <div class="d-flex align-center mb-2" style="gap: 8px">
+          <v-text-field
+            v-model="form.name"
+            label="Food name"
+            variant="outlined"
+            density="compact"
+            hide-details
+          />
+          <ScanLabelButton
+            :extracting="extracting"
+            @picked="onLabelScanned"
+          />
+        </div>
         <v-row dense class="mb-2">
           <v-col cols="6">
             <v-text-field
@@ -69,11 +74,22 @@
 <script lang="ts" setup>
   import { ref, reactive, watch } from 'vue'
   import MacroInputFields from '@/components/daily/MacroInputFields.vue'
+  import ScanLabelButton from '@/components/daily/ScanLabelButton.vue'
   import { useFoodsStore } from '@/stores/foods'
+  import { useExtractMacrosFromLabel } from '@/composables/useExtractMacrosFromLabel'
   import { emptyMacros } from '@/types'
   import type { FoodItem } from '@/types'
 
   const store = useFoodsStore()
+  const { extracting, extract } = useExtractMacrosFromLabel()
+
+  function onLabelScanned(imageDataUrl: string) {
+    extract(imageDataUrl, (result) => {
+      form.macros = result.macros
+      if (result.servingSize !== undefined) form.servingSize = result.servingSize
+      if (result.servingUnit !== undefined) form.servingUnit = result.servingUnit
+    })
+  }
 
   const dialog = defineModel<boolean>({ default: false })
   const props = defineProps<{ editItem?: FoodItem | null }>()
