@@ -33,7 +33,14 @@
             />
           </v-col>
         </v-row>
-        <p class="text-body-2 text-medium-emphasis mb-2">Macros per serving</p>
+        <div class="d-flex align-center justify-space-between mb-2">
+          <p class="text-body-2 text-medium-emphasis mb-0">Macros per serving</p>
+          <ScanLabelButton
+            :disabled="false"
+            :extracting="extracting"
+            @picked="onLabelScanned"
+          />
+        </div>
         <MacroInputFields v-model="form.macros" />
         <div class="d-flex align-center mt-3 mb-1" style="gap: 8px">
           <v-text-field
@@ -69,11 +76,22 @@
 <script lang="ts" setup>
   import { ref, reactive, watch } from 'vue'
   import MacroInputFields from '@/components/daily/MacroInputFields.vue'
+  import ScanLabelButton from '@/components/daily/ScanLabelButton.vue'
   import { useFoodsStore } from '@/stores/foods'
+  import { useExtractMacrosFromLabel } from '@/composables/useExtractMacrosFromLabel'
   import { emptyMacros } from '@/types'
   import type { FoodItem } from '@/types'
 
   const store = useFoodsStore()
+  const { extracting, extract } = useExtractMacrosFromLabel()
+
+  function onLabelScanned(imageDataUrl: string) {
+    extract(imageDataUrl, (result) => {
+      form.macros = result.macros
+      if (result.servingSize !== undefined) form.servingSize = result.servingSize
+      if (result.servingUnit !== undefined) form.servingUnit = result.servingUnit
+    })
+  }
 
   const dialog = defineModel<boolean>({ default: false })
   const props = defineProps<{ editItem?: FoodItem | null }>()

@@ -31,6 +31,11 @@
                 :estimating="estimating"
                 @click="estimate(name.trim(), m => (macros = m))"
               />
+              <ScanLabelButton
+                :disabled="false"
+                :extracting="extracting"
+                @picked="onLabelScanned"
+              />
             </div>
             <MacroInputFields v-model="macros" />
             <div class="d-flex align-center mt-3 mb-1" style="gap: 8px">
@@ -167,10 +172,12 @@
   import { ref, computed, watch } from 'vue'
   import MacroInputFields from './MacroInputFields.vue'
   import AiEstimateButton from './AiEstimateButton.vue'
+  import ScanLabelButton from './ScanLabelButton.vue'
   import { useDailyLogStore } from '@/stores/dailyLog'
   import { useFoodsStore } from '@/stores/foods'
   import { useAppStore } from '@/stores/app'
   import { useEstimateMacros } from '@/composables/useEstimateMacros'
+  import { useExtractMacrosFromLabel } from '@/composables/useExtractMacrosFromLabel'
   import { emptyMacros } from '@/types'
   import type { FoodItem, MealTemplate } from '@/types'
 
@@ -178,6 +185,17 @@
   const foodsStore = useFoodsStore()
   const appStore = useAppStore()
   const { estimating, estimate } = useEstimateMacros()
+  const { extracting, extract } = useExtractMacrosFromLabel()
+
+  function onLabelScanned(imageDataUrl: string) {
+    extract(imageDataUrl, (result) => {
+      macros.value = result.macros
+      if (saveAsFood.value) {
+        if (result.servingSize !== undefined) servingSize.value = result.servingSize
+        if (result.servingUnit !== undefined) servingUnit.value = result.servingUnit
+      }
+    })
+  }
 
   const dialog = ref(false)
   const tab = ref('manual')

@@ -1,8 +1,18 @@
 import type { Macros, MenuRecommendation, SnackSuggestion } from '@/types'
 
+type TextPart = { type: 'text'; text: string }
+type ImagePart = { type: 'image_url'; image_url: { url: string; detail?: 'low' | 'high' | 'auto' } }
+type MessageContent = string | Array<TextPart | ImagePart>
+
 interface ChatMessage {
   role: 'system' | 'user'
-  content: string
+  content: MessageContent
+}
+
+export interface LabelExtractResult {
+  macros: Macros
+  servingSize?: number
+  servingUnit?: string
 }
 
 const MACRO_FIELDS = ['calories', 'protein', 'carbsTotal', 'carbsFiber', 'carbsSugar', 'fat'] as const
@@ -186,4 +196,50 @@ export async function suggestSnacks(
       macros: roundMacros(s.macros),
     } satisfies SnackSuggestion
   })
+}
+
+export async function extractMacrosFromLabelImage(
+  imageDataUrl: string,
+  apiKey: string,
+): Promise<LabelExtractResult> {
+  const parsed = await chatCompletion([
+    {
+      role: 'system',
+      content:
+        'You are a nutrition-label OCR assistant. The user will send a photo of a food product\'s nutrition label (any language, any region). ' +
+        'Extract the macronutrients per single serving as listed on the label. ' +
+        'Rules: ' +
+        '(1) If the label shows both "per 100g" and "per serving" columns, use the per-serving column. ' +
+        '(2) If only "per 100g" (or per 100ml) is shown, return those values and set servingSize=100 with servingUnit="g" (or "ml"). ' +
+        '(3) Convert kJ to kcal (kcal = kJ / 4.184) when calories are only given in kJ. ' +
+        '(4) Treat "<1g", "trace", "—", "-", or missing entries as 0. ' +
+        '(5) If fiber or sugar is not listed at all, return 0 for that field; do not guess. ' +
+        '(6) Round all macro values to the nearest integer. ' +
+        '(7) Extract serving size as a number plus unit if visible (e.g., "30 g" → servingSize: 30, servingUnit: "g"); omit those fields if unclear. ' +
+        '(8) If the image is not a nutrition label, is unreadable, or is missing calories AND protein AND fat, respond with {"error": "<short reason>"} instead. ' +
+        'Return ONLY a JSON object with this shape: ' +
+        '{ "calories": number, "protein": number, "carbsTotal": number, "carbsFiber": number, "carbsSugar": number, "fat": number, "servingSize"?: number, "servingUnit"?: string }.',
+    },
+    {
+      role: 'user',
+      content: [
+        { type: 'text', text: 'Extract macros from this nutrition label.' },
+        { type: 'image_url', image_url: { url: imageDataUrl, detail: 'low' } },
+      ],
+    },
+  ], apiKey)
+
+  if (typeof parsed?.error === 'string') {
+    throw new Error(`Couldn't read label: ${parsed.error}. Try better lighting or a closer shot.`)
+  }
+
+  validateMacros(parsed, 'label')
+  const result: LabelExtractResult = { macros: roundMacros(parsed) }
+  if (typeof parsed.servingSize === 'number' && parsed.servingSize > 0) {
+    result.servingSize = Math.round(parsed.servingSize)
+  }
+  if (typeof parsed.servingUnit === 'string' && parsed.servingUnit.trim()) {
+    result.servingUnit = parsed.servingUnit.trim()
+  }
+  return result
 }
