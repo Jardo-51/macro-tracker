@@ -1,3 +1,4 @@
+import fs from 'node:fs'
 import { fileURLToPath, URL } from 'node:url'
 import Vue from '@vitejs/plugin-vue'
 import Fonts from 'unplugin-fonts/vite'
@@ -60,6 +61,16 @@ export default defineConfig({
         ],
       },
     }),
+    {
+      name: 'remove-mdi-font-preloads',
+      closeBundle() {
+        const htmlPath = fileURLToPath(new URL('./dist/index.html', import.meta.url))
+        if (fs.existsSync(htmlPath)) {
+          const html = fs.readFileSync(htmlPath, 'utf-8')
+          fs.writeFileSync(htmlPath, html.replace(/<link[^>]+materialdesignicons[^>]+>\n?/g, ''))
+        }
+      },
+    },
   ],
   define: { 'process.env': {} },
   resolve: {
