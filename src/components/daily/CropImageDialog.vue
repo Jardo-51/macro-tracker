@@ -48,8 +48,6 @@
   const ready = ref(false)
   const imgW = ref(0)
   const imgH = ref(0)
-  const naturalW = ref(0)
-  const naturalH = ref(0)
 
   const rect = reactive({ x: 0, y: 0, w: 1, h: 1 })
 
@@ -59,8 +57,10 @@
   let startRect = { x: 0, y: 0, w: 0, h: 0 }
   const MIN_PX = 24
   const MAX_EDGE = 1024
+  const PREVIEW_MAX_EDGE = 1024
 
   let observer: ResizeObserver | null = null
+  let originalBitmap: ImageBitmap | null = null
 
   const rectStyle = computed(() => ({
     left: rect.x * imgW.value + 'px',
@@ -97,6 +97,8 @@
     if (!isOpen) {
       ready.value = false
       observer?.disconnect()
+      originalBitmap?.close?.()
+      originalBitmap = null
       return
     }
     if (props.file) await loadFile(props.file)
@@ -104,6 +106,9 @@
 
   async function loadFile(file: File) {
     ready.value = false
+    originalBitmap?.close?.()
+    originalBitmap = null
+
     let bitmap: ImageBitmap
     try {
       bitmap = await createImageBitmap(file)
@@ -112,29 +117,22 @@
       open.value = false
       return
     }
+    originalBitmap = bitmap
+
     const longest = Math.max(bitmap.width, bitmap.height)
-    const scale = longest > MAX_EDGE ? MAX_EDGE / longest : 1
+    const scale = longest > PREVIEW_MAX_EDGE ? PREVIEW_MAX_EDGE / longest : 1
     const w = Math.round(bitmap.width * scale)
     const h = Math.round(bitmap.height * scale)
 
     await nextTick()
     const canvas = canvasEl.value
-    if (!canvas) {
-      bitmap.close?.()
-      return
-    }
+    if (!canvas) return
     canvas.width = w
     canvas.height = h
     const ctx = canvas.getContext('2d')
-    if (!ctx) {
-      bitmap.close?.()
-      return
-    }
+    if (!ctx) return
     ctx.drawImage(bitmap, 0, 0, w, h)
-    bitmap.close?.()
 
-    naturalW.value = w
-    naturalH.value = h
     rect.x = 0
     rect.y = 0
     rect.w = 1
@@ -210,23 +208,31 @@
 
   onBeforeUnmount(() => {
     observer?.disconnect()
+    originalBitmap?.close?.()
+    originalBitmap = null
     window.removeEventListener('pointermove', onMove)
   })
 
   async function apply() {
-    const canvas = canvasEl.value
-    if (!canvas || !ready.value) return
-    const sx = Math.round(rect.x * naturalW.value)
-    const sy = Math.round(rect.y * naturalH.value)
-    const sw = Math.max(1, Math.round(rect.w * naturalW.value))
-    const sh = Math.max(1, Math.round(rect.h * naturalH.value))
+    if (!ready.value || !originalBitmap) return
+    const ow = originalBitmap.width
+    const oh = originalBitmap.height
+    const sx = Math.round(rect.x * ow)
+    const sy = Math.round(rect.y * oh)
+    const sw = Math.max(1, Math.round(rect.w * ow))
+    const sh = Math.max(1, Math.round(rect.h * oh))
+
+    const longest = Math.max(sw, sh)
+    const scale = longest > MAX_EDGE ? MAX_EDGE / longest : 1
+    const outW = Math.max(1, Math.round(sw * scale))
+    const outH = Math.max(1, Math.round(sh * scale))
 
     const out = document.createElement('canvas')
-    out.width = sw
-    out.height = sh
+    out.width = outW
+    out.height = outH
     const ctx = out.getContext('2d')
     if (!ctx) return
-    ctx.drawImage(canvas, sx, sy, sw, sh, 0, 0, sw, sh)
+    ctx.drawImage(originalBitmap, sx, sy, sw, sh, 0, 0, outW, outH)
 
     const blob: Blob = await new Promise((resolve, reject) => {
       out.toBlob(
