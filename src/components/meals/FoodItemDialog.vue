@@ -3,14 +3,20 @@
     <v-card>
       <v-card-title>{{ isEdit ? 'Edit Food' : 'New Food' }}</v-card-title>
       <v-card-text>
-        <v-text-field
-          v-model="form.name"
-          label="Food name"
-          variant="outlined"
-          density="compact"
-          class="mb-2"
-          hide-details
-        />
+        <div class="d-flex align-center mb-2" style="gap: 8px">
+          <v-text-field
+            v-model="form.name"
+            label="Food name"
+            variant="outlined"
+            density="compact"
+            hide-details
+          />
+          <ScanLabelButton
+            :disabled="false"
+            :extracting="extracting"
+            @picked="onLabelScanned"
+          />
+        </div>
         <v-row dense class="mb-2">
           <v-col cols="6">
             <v-text-field
@@ -33,14 +39,7 @@
             />
           </v-col>
         </v-row>
-        <div class="d-flex align-center justify-space-between mb-2">
-          <p class="text-body-2 text-medium-emphasis mb-0">Macros per serving</p>
-          <ScanLabelButton
-            :disabled="false"
-            :extracting="extracting"
-            @picked="onLabelScanned"
-          />
-        </div>
+        <p class="text-body-2 text-medium-emphasis mb-2">Macros per serving</p>
         <MacroInputFields v-model="form.macros" />
         <div class="d-flex align-center mt-3 mb-1" style="gap: 8px">
           <v-text-field
