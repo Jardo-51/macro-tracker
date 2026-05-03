@@ -57,10 +57,14 @@
   let startRect = { x: 0, y: 0, w: 0, h: 0 }
   const MIN_PX = 24
   const MAX_EDGE = 1024
-  const PREVIEW_MAX_EDGE = 1024
 
   let observer: ResizeObserver | null = null
   let originalBitmap: ImageBitmap | null = null
+
+  function releaseBitmap() {
+    originalBitmap?.close?.()
+    originalBitmap = null
+  }
 
   const rectStyle = computed(() => ({
     left: rect.x * imgW.value + 'px',
@@ -97,8 +101,7 @@
     if (!isOpen) {
       ready.value = false
       observer?.disconnect()
-      originalBitmap?.close?.()
-      originalBitmap = null
+      releaseBitmap()
       return
     }
     if (props.file) await loadFile(props.file)
@@ -106,8 +109,7 @@
 
   async function loadFile(file: File) {
     ready.value = false
-    originalBitmap?.close?.()
-    originalBitmap = null
+    releaseBitmap()
 
     let bitmap: ImageBitmap
     try {
@@ -120,7 +122,7 @@
     originalBitmap = bitmap
 
     const longest = Math.max(bitmap.width, bitmap.height)
-    const scale = longest > PREVIEW_MAX_EDGE ? PREVIEW_MAX_EDGE / longest : 1
+    const scale = longest > MAX_EDGE ? MAX_EDGE / longest : 1
     const w = Math.round(bitmap.width * scale)
     const h = Math.round(bitmap.height * scale)
 
@@ -208,8 +210,7 @@
 
   onBeforeUnmount(() => {
     observer?.disconnect()
-    originalBitmap?.close?.()
-    originalBitmap = null
+    releaseBitmap()
     window.removeEventListener('pointermove', onMove)
   })
 

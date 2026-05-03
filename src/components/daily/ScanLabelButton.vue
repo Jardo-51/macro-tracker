@@ -5,7 +5,6 @@
       size="small"
       variant="tonal"
       color="primary"
-      :disabled="disabled"
       :loading="extracting"
       @click="openPicker"
     >
@@ -33,7 +32,7 @@
   import { useAppStore } from '@/stores/app'
   import CropImageDialog from './CropImageDialog.vue'
 
-  defineProps<{ disabled: boolean; extracting: boolean }>()
+  defineProps<{ extracting: boolean }>()
   const emit = defineEmits<{ picked: [imageDataUrl: string] }>()
 
   const appStore = useAppStore()

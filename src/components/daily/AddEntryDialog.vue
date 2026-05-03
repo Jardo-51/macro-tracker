@@ -32,7 +32,6 @@
                 @click="estimate(name.trim(), m => (macros = m))"
               />
               <ScanLabelButton
-                :disabled="false"
                 :extracting="extracting"
                 @picked="onLabelScanned"
               />

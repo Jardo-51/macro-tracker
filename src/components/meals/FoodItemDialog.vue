@@ -12,7 +12,6 @@
             hide-details
           />
           <ScanLabelButton
-            :disabled="false"
             :extracting="extracting"
             @picked="onLabelScanned"
           />
