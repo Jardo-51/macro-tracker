@@ -9,19 +9,20 @@
         <div class="crop-container">
           <img
             ref="imgEl"
-            :src="imageDataUrl"
+            :src="props.imageDataUrl"
             class="crop-img"
             draggable="false"
             @load="onImageLoad"
+            @error="onImageError"
           >
-          <template v-if="loaded">
-            <div class="crop-mask" :style="{ top: 0, left: 0, right: 0, height: rect.y + 'px' }" />
-            <div class="crop-mask" :style="{ top: (rect.y + rect.h) + 'px', left: 0, right: 0, bottom: 0 }" />
-            <div class="crop-mask" :style="{ top: rect.y + 'px', left: 0, width: rect.x + 'px', height: rect.h + 'px' }" />
-            <div class="crop-mask" :style="{ top: rect.y + 'px', left: (rect.x + rect.w) + 'px', right: 0, height: rect.h + 'px' }" />
+          <template v-if="ready">
+            <div class="crop-mask" :style="topMask" />
+            <div class="crop-mask" :style="bottomMask" />
+            <div class="crop-mask" :style="leftMask" />
+            <div class="crop-mask" :style="rightMask" />
             <div
               class="crop-rect"
-              :style="{ left: rect.x + 'px', top: rect.y + 'px', width: rect.w + 'px', height: rect.h + 'px' }"
+              :style="rectStyle"
               @pointerdown.stop.prevent="startDrag('move', $event)"
             >
               <div class="handle tl" @pointerdown.stop.prevent="startDrag('tl', $event)" />
@@ -35,41 +36,104 @@
       <v-card-actions>
         <v-spacer />
         <v-btn variant="text" @click="cancel">Cancel</v-btn>
-        <v-btn color="primary" variant="flat" :disabled="!loaded" @click="apply">Apply</v-btn>
+        <v-btn color="primary" variant="flat" :disabled="!ready" @click="apply">Apply</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
 </template>
 
 <script lang="ts" setup>
-  import { ref, reactive, watch } from 'vue'
+  import { ref, reactive, computed, watch, onBeforeUnmount } from 'vue'
+  import { useAppStore } from '@/stores/app'
 
-  defineProps<{ imageDataUrl: string }>()
+  const props = defineProps<{ imageDataUrl: string }>()
   const open = defineModel<boolean>({ default: false })
   const emit = defineEmits<{ cropped: [imageDataUrl: string] }>()
 
+  const appStore = useAppStore()
   const imgEl = ref<HTMLImageElement | null>(null)
   const loaded = ref(false)
-  const rect = reactive({ x: 0, y: 0, w: 0, h: 0 })
+  const imgW = ref(0)
+  const imgH = ref(0)
+
+  const rect = reactive({ x: 0, y: 0, w: 1, h: 1 })
 
   let mode: '' | 'move' | 'tl' | 'tr' | 'bl' | 'br' = ''
   let startX = 0
   let startY = 0
   let startRect = { x: 0, y: 0, w: 0, h: 0 }
-  const MIN = 24
+  const MIN_PX = 24
 
-  watch(open, (v) => {
-    if (!v) loaded.value = false
+  let observer: ResizeObserver | null = null
+
+  const ready = computed(() => loaded.value && imgW.value > 0 && imgH.value > 0)
+
+  const rectStyle = computed(() => ({
+    left: rect.x * imgW.value + 'px',
+    top: rect.y * imgH.value + 'px',
+    width: rect.w * imgW.value + 'px',
+    height: rect.h * imgH.value + 'px',
+  }))
+  const topMask = computed(() => ({
+    top: '0',
+    left: '0',
+    right: '0',
+    height: rect.y * imgH.value + 'px',
+  }))
+  const bottomMask = computed(() => ({
+    top: (rect.y + rect.h) * imgH.value + 'px',
+    left: '0',
+    right: '0',
+    bottom: '0',
+  }))
+  const leftMask = computed(() => ({
+    top: rect.y * imgH.value + 'px',
+    left: '0',
+    width: rect.x * imgW.value + 'px',
+    height: rect.h * imgH.value + 'px',
+  }))
+  const rightMask = computed(() => ({
+    top: rect.y * imgH.value + 'px',
+    left: (rect.x + rect.w) * imgW.value + 'px',
+    right: '0',
+    height: rect.h * imgH.value + 'px',
+  }))
+
+  watch(() => props.imageDataUrl, () => {
+    loaded.value = false
+    imgW.value = 0
+    imgH.value = 0
+    rect.x = 0
+    rect.y = 0
+    rect.w = 1
+    rect.h = 1
   })
+
+  function attachObserver(img: HTMLImageElement) {
+    observer?.disconnect()
+    const sync = () => {
+      imgW.value = img.clientWidth
+      imgH.value = img.clientHeight
+    }
+    sync()
+    observer = new ResizeObserver(sync)
+    observer.observe(img)
+  }
 
   function onImageLoad() {
     const img = imgEl.value
     if (!img) return
     rect.x = 0
     rect.y = 0
-    rect.w = img.clientWidth
-    rect.h = img.clientHeight
+    rect.w = 1
+    rect.h = 1
     loaded.value = true
+    attachObserver(img)
+  }
+
+  function onImageError() {
+    appStore.showSnackbar('Could not load image for cropping', 'error')
+    open.value = false
   }
 
   function clamp(v: number, min: number, max: number) {
@@ -77,46 +141,47 @@
   }
 
   function startDrag(m: typeof mode, e: PointerEvent) {
-    if (!loaded.value) return
+    if (!ready.value) return
     mode = m
     startX = e.clientX
     startY = e.clientY
-    startRect = { ...rect }
+    startRect = { x: rect.x, y: rect.y, w: rect.w, h: rect.h }
     window.addEventListener('pointermove', onMove)
     window.addEventListener('pointerup', onEnd, { once: true })
     window.addEventListener('pointercancel', onEnd, { once: true })
   }
 
   function onMove(e: PointerEvent) {
-    const img = imgEl.value
-    if (!img) return
-    const W = img.clientWidth
-    const H = img.clientHeight
-    const dx = e.clientX - startX
-    const dy = e.clientY - startY
+    const W = imgW.value
+    const H = imgH.value
+    if (!W || !H) return
+    const dxF = (e.clientX - startX) / W
+    const dyF = (e.clientY - startY) / H
+    const minXF = MIN_PX / W
+    const minYF = MIN_PX / H
     if (mode === 'move') {
-      rect.x = clamp(startRect.x + dx, 0, W - startRect.w)
-      rect.y = clamp(startRect.y + dy, 0, H - startRect.h)
+      rect.x = clamp(startRect.x + dxF, 0, 1 - startRect.w)
+      rect.y = clamp(startRect.y + dyF, 0, 1 - startRect.h)
     } else if (mode === 'br') {
-      rect.w = clamp(startRect.w + dx, MIN, W - startRect.x)
-      rect.h = clamp(startRect.h + dy, MIN, H - startRect.y)
+      rect.w = clamp(startRect.w + dxF, minXF, 1 - startRect.x)
+      rect.h = clamp(startRect.h + dyF, minYF, 1 - startRect.y)
     } else if (mode === 'tl') {
-      const nx = clamp(startRect.x + dx, 0, startRect.x + startRect.w - MIN)
-      const ny = clamp(startRect.y + dy, 0, startRect.y + startRect.h - MIN)
+      const nx = clamp(startRect.x + dxF, 0, startRect.x + startRect.w - minXF)
+      const ny = clamp(startRect.y + dyF, 0, startRect.y + startRect.h - minYF)
       rect.x = nx
       rect.y = ny
       rect.w = startRect.x + startRect.w - nx
       rect.h = startRect.y + startRect.h - ny
     } else if (mode === 'tr') {
-      const ny = clamp(startRect.y + dy, 0, startRect.y + startRect.h - MIN)
+      const ny = clamp(startRect.y + dyF, 0, startRect.y + startRect.h - minYF)
       rect.y = ny
       rect.h = startRect.y + startRect.h - ny
-      rect.w = clamp(startRect.w + dx, MIN, W - startRect.x)
+      rect.w = clamp(startRect.w + dxF, minXF, 1 - startRect.x)
     } else if (mode === 'bl') {
-      const nx = clamp(startRect.x + dx, 0, startRect.x + startRect.w - MIN)
+      const nx = clamp(startRect.x + dxF, 0, startRect.x + startRect.w - minXF)
       rect.x = nx
       rect.w = startRect.x + startRect.w - nx
-      rect.h = clamp(startRect.h + dy, MIN, H - startRect.y)
+      rect.h = clamp(startRect.h + dyF, minYF, 1 - startRect.y)
     }
   }
 
@@ -125,15 +190,18 @@
     window.removeEventListener('pointermove', onMove)
   }
 
+  onBeforeUnmount(() => {
+    observer?.disconnect()
+    window.removeEventListener('pointermove', onMove)
+  })
+
   async function apply() {
     const img = imgEl.value
-    if (!img) return
-    const scaleX = img.naturalWidth / img.clientWidth
-    const scaleY = img.naturalHeight / img.clientHeight
-    const sx = Math.round(rect.x * scaleX)
-    const sy = Math.round(rect.y * scaleY)
-    const sw = Math.max(1, Math.round(rect.w * scaleX))
-    const sh = Math.max(1, Math.round(rect.h * scaleY))
+    if (!img || !ready.value) return
+    const sx = Math.round(rect.x * img.naturalWidth)
+    const sy = Math.round(rect.y * img.naturalHeight)
+    const sw = Math.max(1, Math.round(rect.w * img.naturalWidth))
+    const sh = Math.max(1, Math.round(rect.h * img.naturalHeight))
 
     const canvas = document.createElement('canvas')
     canvas.width = sw
@@ -176,7 +244,7 @@
 }
 .crop-img {
   display: block;
-  max-width: 100%;
+  width: 100%;
   height: auto;
   -webkit-user-drag: none;
 }
