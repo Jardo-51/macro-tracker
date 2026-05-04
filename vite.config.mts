@@ -60,16 +60,19 @@ export default defineConfig({
         ],
       },
     }),
-    // unplugin-fonts scans CSS for @font-face and emits a `<link rel=preload>`
-    // for every src URL it finds. The mdi CSS imported in src/plugins/vuetify.ts
-    // declares 4 formats (eot/woff2/woff/ttf), so 4 preloads get emitted but
-    // only one is ever used — browsers warn about the unused ones. Strip them.
+    // unplugin-fonts emits a `<link rel=preload>` for every bundled font file.
+    // The mdi CSS ships 4 formats and @fontsource/roboto bundles many subsets
+    // and weights — the browser ends up racing the preloads against the
+    // @font-face rules in CSS and warns that the preloads aren't used in time.
+    // Strip them all; the font files stay bundled and load on demand via CSS.
     {
-      name: 'remove-mdi-font-preloads',
+      name: 'remove-unused-font-preloads',
       enforce: 'post',
       transformIndexHtml: {
         order: 'post',
-        handler: (html) => html.replace(/\s*<link[^>]+materialdesignicons[^>]+>/g, ''),
+        handler: (html) => html
+          .replace(/\s*<link[^>]+materialdesignicons[^>]+>/g, '')
+          .replace(/\s*<link[^>]+\/roboto-[^>]+>/g, ''),
       },
     },
   ],
