@@ -7,8 +7,14 @@
  * access tokens are then refreshed silently in the background. Tokens are
  * persisted in localStorage so the session is restored on the next visit.
  */
-import { UserManager, WebStorageStateStore, type User } from 'oidc-client-ts'
+import { UserManager, type User } from 'oidc-client-ts'
 import { ref } from 'vue'
+import { EncryptedStateStore } from '@/services/encryptedStateStore'
+
+// One store serves both the persisted user (tokens) and the transient redirect
+// state (PKCE verifier); both are kept encrypted at rest instead of in
+// plaintext localStorage. See EncryptedStateStore for the threat model.
+const encryptedStore = new EncryptedStateStore()
 
 const userManager = new UserManager({
   authority: import.meta.env.VITE_KEYCLOAK_AUTHORITY ?? '',
@@ -17,7 +23,8 @@ const userManager = new UserManager({
   post_logout_redirect_uri: window.location.origin,
   response_type: 'code',
   scope: 'openid offline_access',
-  userStore: new WebStorageStateStore({ store: window.localStorage }),
+  userStore: encryptedStore,
+  stateStore: encryptedStore,
   automaticSilentRenew: true,
   monitorSession: false,
 })
