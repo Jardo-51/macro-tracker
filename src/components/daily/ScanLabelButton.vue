@@ -1,5 +1,5 @@
 <template>
-  <template v-if="appStore.openaiApiKey">
+  <template v-if="appStore.aiLoggedIn">
     <v-btn
       icon
       size="small"

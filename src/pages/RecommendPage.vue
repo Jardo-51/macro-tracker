@@ -37,7 +37,7 @@
       variant="flat"
       block
       :loading="loading"
-      :disabled="!menuText.trim() || !app.openaiApiKey"
+      :disabled="!menuText.trim() || !app.aiLoggedIn"
       class="mb-4"
       @click="getRecommendation"
     >
@@ -49,7 +49,7 @@
       variant="flat"
       block
       :loading="snacksLoading"
-      :disabled="!app.openaiApiKey"
+      :disabled="!app.aiLoggedIn"
       class="mb-4"
       @click="getSnackSuggestions"
     >
@@ -57,12 +57,12 @@
     </v-btn>
 
     <v-alert
-      v-if="!app.openaiApiKey"
+      v-if="!app.aiLoggedIn"
       type="info"
       variant="tonal"
       class="mb-4"
     >
-      Set your OpenAI API key in
+      Log in from
       <router-link to="/settings">Settings</router-link>
       to use this feature.
     </v-alert>
@@ -166,7 +166,7 @@
   import { ref, onMounted } from 'vue'
   import { useDailyLogStore } from '@/stores/dailyLog'
   import { useAppStore } from '@/stores/app'
-  import { recommendFromMenu, suggestSnacks } from '@/services/openai'
+  import { recommendFromMenu, suggestSnacks } from '@/services/aiProvider'
   import { today } from '@/utils/date'
   import { emptyMacros } from '@/types'
   import type { MenuRecommendation, RecommendedItem, SnackSuggestion } from '@/types'
@@ -195,7 +195,6 @@
       recommendation.value = await recommendFromMenu(
         menuText.value,
         dailyLog.remainingMacros,
-        app.openaiApiKey,
       )
     } catch (e: any) {
       error.value = e.message || 'Failed to get recommendation'
@@ -209,7 +208,7 @@
     error.value = ''
     snacks.value = []
     try {
-      snacks.value = await suggestSnacks(dailyLog.remainingMacros, app.openaiApiKey)
+      snacks.value = await suggestSnacks(dailyLog.remainingMacros)
     } catch (e: any) {
       error.value = e.message || 'Failed to get snack suggestions'
     } finally {

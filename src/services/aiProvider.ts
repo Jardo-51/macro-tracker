@@ -1,4 +1,5 @@
 import type { Macros, MenuRecommendation, SnackSuggestion } from '@/types'
+import { getAccessToken } from '@/services/auth'
 
 type TextPart = { type: 'text'; text: string }
 type ImagePart = { type: 'image_url'; image_url: { url: string; detail?: 'low' | 'high' | 'auto' } }
@@ -17,18 +18,22 @@ export interface LabelExtractResult {
 
 const MACRO_FIELDS = ['calories', 'protein', 'carbsTotal', 'carbsFiber', 'carbsSugar', 'fat'] as const
 
-async function chatCompletion(messages: ChatMessage[], apiKey: string): Promise<any> {
+const PROVIDER_URL = import.meta.env.VITE_AI_PROVIDER_URL ?? 'https://ai.kalkules.com'
+
+async function chatCompletion(messages: ChatMessage[]): Promise<any> {
+  const token = await getAccessToken()
+
   let response: Response
   try {
-    response = await fetch('https://api.openai.com/v1/chat/completions', {
+    response = await fetch(`${PROVIDER_URL}/api/v1/chat`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${apiKey}`,
+        Authorization: `Bearer ${token}`,
       },
+      // The gateway selects the model server-side, so no `model` field.
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        response_format: { type: 'json_object' },
+        responseFormat: 'json_object',
         messages,
       }),
     })
@@ -38,18 +43,18 @@ async function chatCompletion(messages: ChatMessage[], apiKey: string): Promise<
 
   if (!response.ok) {
     if (response.status === 401) {
-      throw new Error('Invalid API key. Check your OpenAI key in Settings.')
+      throw new Error('Your AI session expired. Log in again in Settings.')
     }
     if (response.status === 429) {
-      throw new Error('Rate limit exceeded. Check your OpenAI billing/quota and try again later.')
+      throw new Error('Daily AI limit reached. Try again tomorrow.')
     }
-    throw new Error(`OpenAI request failed (${response.status})`)
+    throw new Error(`AI request failed (${response.status})`)
   }
 
   const data = await response.json()
-  const content = data.choices?.[0]?.message?.content
+  const content = data.content
   if (!content) {
-    throw new Error('Unexpected response from OpenAI')
+    throw new Error('Unexpected response from AI service')
   }
 
   return JSON.parse(content)
@@ -74,7 +79,7 @@ function roundMacros(obj: any): Macros {
   }
 }
 
-export async function estimateMacros(foodName: string, apiKey: string): Promise<Macros> {
+export async function estimateMacros(foodName: string): Promise<Macros> {
   const parsed = await chatCompletion([
     {
       role: 'system',
@@ -86,7 +91,7 @@ export async function estimateMacros(foodName: string, apiKey: string): Promise<
         'Return only the JSON object, no extra text.',
     },
     { role: 'user', content: foodName },
-  ], apiKey)
+  ])
 
   validateMacros(parsed, 'response')
   return roundMacros(parsed)
@@ -95,7 +100,6 @@ export async function estimateMacros(foodName: string, apiKey: string): Promise<
 export async function recommendFromMenu(
   menuText: string,
   remainingMacros: { calories: number; protein: number; carbsTotal: number; fat: number },
-  apiKey: string,
 ): Promise<MenuRecommendation> {
   const parsed = await chatCompletion([
     {
@@ -118,7 +122,7 @@ export async function recommendFromMenu(
         `Remaining daily macros: ${remainingMacros.calories} kcal, ${remainingMacros.protein}g protein, ${remainingMacros.carbsTotal}g carbs, ${remainingMacros.fat}g fat.\n\n` +
         `Restaurant menu:\n${menuText}`,
     },
-  ], apiKey)
+  ])
 
   if (!parsed.mainCourse || typeof parsed.mainCourse.name !== 'string') {
     throw new Error('Invalid response: missing mainCourse')
@@ -162,7 +166,6 @@ export async function recommendFromMenu(
 
 export async function suggestSnacks(
   remainingMacros: { calories: number; protein: number; carbsTotal: number; fat: number },
-  apiKey: string,
 ): Promise<SnackSuggestion[]> {
   const parsed = await chatCompletion([
     {
@@ -179,7 +182,7 @@ export async function suggestSnacks(
       role: 'user',
       content: `Remaining daily macros: ${remainingMacros.calories} kcal, ${remainingMacros.protein}g protein, ${remainingMacros.carbsTotal}g carbs, ${remainingMacros.fat}g fat.`,
     },
-  ], apiKey)
+  ])
 
   if (!Array.isArray(parsed.snacks) || parsed.snacks.length === 0) {
     throw new Error('Invalid response: missing snacks array')
@@ -200,7 +203,6 @@ export async function suggestSnacks(
 
 export async function extractMacrosFromLabelImage(
   imageDataUrl: string,
-  apiKey: string,
 ): Promise<LabelExtractResult> {
   const parsed = await chatCompletion([
     {
@@ -227,7 +229,7 @@ export async function extractMacrosFromLabelImage(
         { type: 'image_url', image_url: { url: imageDataUrl, detail: 'low' } },
       ],
     },
-  ], apiKey)
+  ])
 
   if (typeof parsed?.error === 'string') {
     throw new Error(`Couldn't read label: ${parsed.error}. Try better lighting or a closer shot.`)

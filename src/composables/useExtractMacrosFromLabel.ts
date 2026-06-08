@@ -1,6 +1,6 @@
 import { ref } from 'vue'
 import { useAppStore } from '@/stores/app'
-import { extractMacrosFromLabelImage, type LabelExtractResult } from '@/services/openai'
+import { extractMacrosFromLabelImage, type LabelExtractResult } from '@/services/aiProvider'
 
 export function useExtractMacrosFromLabel() {
   const appStore = useAppStore()
@@ -12,7 +12,7 @@ export function useExtractMacrosFromLabel() {
   ) {
     extracting.value = true
     try {
-      const result = await extractMacrosFromLabelImage(imageDataUrl, appStore.openaiApiKey)
+      const result = await extractMacrosFromLabelImage(imageDataUrl)
       onSuccess(result)
     } catch (e: any) {
       appStore.showSnackbar(e.message || 'Label scan failed', 'error')
