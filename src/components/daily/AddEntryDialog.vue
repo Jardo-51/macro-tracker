@@ -219,17 +219,13 @@
   const mealSearch = ref('')
   const selectedMeal = ref<MealTemplate | null>(null)
 
-  const filteredFoods = computed(() => {
-    const q = foodSearch.value.toLowerCase()
-    if (!q) return foodsStore.recentFoodItems
-    return foodsStore.recentFoodItems.filter(f => f.name.toLowerCase().includes(q))
-  })
+  const filteredFoods = computed(() =>
+    foodsStore.filterByName(foodsStore.recentFoodItems, foodSearch.value)
+  )
 
-  const filteredMeals = computed(() => {
-    const q = mealSearch.value.toLowerCase()
-    if (!q) return foodsStore.recentMealTemplates
-    return foodsStore.recentMealTemplates.filter(m => m.name.toLowerCase().includes(q))
-  })
+  const filteredMeals = computed(() =>
+    foodsStore.filterByName(foodsStore.recentMealTemplates, mealSearch.value)
+  )
 
   const canSave = computed(() => {
     if (tab.value === 'manual') return !!name.value.trim()
