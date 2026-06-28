@@ -79,6 +79,10 @@ export const useDailyLogStore = defineStore('dailyLog', () => {
       createdAt: new Date().toISOString(),
     }
     await db.dailyLogEntries.add(newEntry)
+    if (entry.sourceId && (entry.sourceType === 'food' || entry.sourceType === 'meal')) {
+      const table = entry.sourceType === 'food' ? db.foodItems : db.mealTemplates
+      await table.update(entry.sourceId, { lastUsedAt: newEntry.createdAt })
+    }
     if (entry.date === currentDate.value) {
       entries.value.push(newEntry)
     }
