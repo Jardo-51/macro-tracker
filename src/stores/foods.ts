@@ -11,7 +11,8 @@ function compareByRecency(
   a: FoodItem | MealTemplate,
   b: FoodItem | MealTemplate,
 ) {
-  const la = a.lastUsedAt, lb = b.lastUsedAt
+  const la = a.lastUsedAt ?? null
+  const lb = b.lastUsedAt ?? null
   if (la && lb) return lb.localeCompare(la)
   if (la) return -1
   if (lb) return 1
