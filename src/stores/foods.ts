@@ -19,22 +19,23 @@ function compareByRecency(
   return b.createdAt.localeCompare(a.createdAt)
 }
 
+function filterByName<T extends FoodItem | MealTemplate>(
+  items: T[],
+  query: string,
+): T[] {
+  if (!query) return items
+  const q = query.toLowerCase()
+  return items.filter(item => item.name.toLowerCase().includes(q))
+}
+
 export const useFoodsStore = defineStore('foods', () => {
   const foodItems = ref<FoodItem[]>([])
   const mealTemplates = ref<MealTemplate[]>([])
   const searchQuery = ref('')
 
-  const filteredFoodItems = computed(() => {
-    if (!searchQuery.value) return foodItems.value
-    const q = searchQuery.value.toLowerCase()
-    return foodItems.value.filter(f => f.name.toLowerCase().includes(q))
-  })
+  const filteredFoodItems = computed(() => filterByName(foodItems.value, searchQuery.value))
 
-  const filteredMealTemplates = computed(() => {
-    if (!searchQuery.value) return mealTemplates.value
-    const q = searchQuery.value.toLowerCase()
-    return mealTemplates.value.filter(m => m.name.toLowerCase().includes(q))
-  })
+  const filteredMealTemplates = computed(() => filterByName(mealTemplates.value, searchQuery.value))
 
   // Recency-sorted lists for the Add Entry dialog. MealsPage keeps using the
   // created-order lists above.
@@ -112,5 +113,6 @@ export const useFoodsStore = defineStore('foods', () => {
     addMealTemplate,
     updateMealTemplate,
     deleteMealTemplate,
+    filterByName,
   }
 })
