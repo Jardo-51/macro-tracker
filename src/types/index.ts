@@ -14,6 +14,7 @@ export interface FoodItem {
   servingUnit: string
   macros: Macros
   createdAt: string
+  lastUsedAt?: string
 }
 
 export interface MealTemplate {
@@ -21,6 +22,7 @@ export interface MealTemplate {
   name: string
   macros: Macros
   createdAt: string
+  lastUsedAt?: string
 }
 
 export interface DailyLogEntry {

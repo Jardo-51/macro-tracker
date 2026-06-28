@@ -4,6 +4,21 @@ import { db } from '@/db'
 import type { FoodItem, MealTemplate } from '@/types'
 import { uuidv7 } from 'uuidv7'
 
+// Used items rank by lastUsedAt (most recent first); never-used items fall
+// below, keeping the default newest-created-first order. ISO-8601 timestamps
+// sort correctly lexicographically.
+function compareByRecency(
+  a: FoodItem | MealTemplate,
+  b: FoodItem | MealTemplate,
+) {
+  const la = a.lastUsedAt ?? null
+  const lb = b.lastUsedAt ?? null
+  if (la && lb) return lb.localeCompare(la)
+  if (la) return -1
+  if (lb) return 1
+  return b.createdAt.localeCompare(a.createdAt)
+}
+
 export const useFoodsStore = defineStore('foods', () => {
   const foodItems = ref<FoodItem[]>([])
   const mealTemplates = ref<MealTemplate[]>([])
@@ -20,6 +35,11 @@ export const useFoodsStore = defineStore('foods', () => {
     const q = searchQuery.value.toLowerCase()
     return mealTemplates.value.filter(m => m.name.toLowerCase().includes(q))
   })
+
+  // Recency-sorted lists for the Add Entry dialog. MealsPage keeps using the
+  // created-order lists above.
+  const recentFoodItems = computed(() => [...foodItems.value].sort(compareByRecency))
+  const recentMealTemplates = computed(() => [...mealTemplates.value].sort(compareByRecency))
 
   async function loadFoodItems() {
     foodItems.value = await db.foodItems.orderBy('createdAt').reverse().toArray()
@@ -81,6 +101,8 @@ export const useFoodsStore = defineStore('foods', () => {
     searchQuery,
     filteredFoodItems,
     filteredMealTemplates,
+    recentFoodItems,
+    recentMealTemplates,
     loadFoodItems,
     loadMealTemplates,
     loadAll,

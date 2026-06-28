@@ -221,14 +221,14 @@
 
   const filteredFoods = computed(() => {
     const q = foodSearch.value.toLowerCase()
-    if (!q) return foodsStore.foodItems
-    return foodsStore.foodItems.filter(f => f.name.toLowerCase().includes(q))
+    if (!q) return foodsStore.recentFoodItems
+    return foodsStore.recentFoodItems.filter(f => f.name.toLowerCase().includes(q))
   })
 
   const filteredMeals = computed(() => {
     const q = mealSearch.value.toLowerCase()
-    if (!q) return foodsStore.mealTemplates
-    return foodsStore.mealTemplates.filter(m => m.name.toLowerCase().includes(q))
+    if (!q) return foodsStore.recentMealTemplates
+    return foodsStore.recentMealTemplates.filter(m => m.name.toLowerCase().includes(q))
   })
 
   const canSave = computed(() => {
