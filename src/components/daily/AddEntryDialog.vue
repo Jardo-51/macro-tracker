@@ -7,7 +7,7 @@
     @click="dialog = true"
   />
 
-  <v-dialog v-model="dialog" max-width="500" scrollable>
+  <v-dialog v-model="dialog" max-width="500">
     <v-card>
       <v-card-title>Add Entry</v-card-title>
       <v-tabs v-model="tab" grow>
@@ -15,7 +15,7 @@
         <v-tab value="foods">My Foods</v-tab>
         <v-tab value="meals">My Meals</v-tab>
       </v-tabs>
-      <v-card-text>
+      <v-card-text style="max-height: 60vh; overflow-y: auto">
         <v-tabs-window v-model="tab">
           <v-tabs-window-item value="manual">
             <div class="d-flex align-center mt-2 mb-4" style="gap: 8px">
