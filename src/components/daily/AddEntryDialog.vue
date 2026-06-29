@@ -197,7 +197,7 @@
   }
 
   const dialog = ref(false)
-  const tab = ref('manual')
+  const tab = ref('foods')
   const name = ref('')
   const macros = ref(emptyMacros())
   const saveAsFood = ref(false)
@@ -309,7 +309,7 @@
     servingSize.value = 100
     servingUnit.value = 'g'
     multiplier.value = 1
-    tab.value = 'manual'
+    tab.value = 'foods'
     selectedFood.value = null
     selectedMeal.value = null
     foodSearch.value = ''
