@@ -5,7 +5,7 @@ import { seedDefaults } from '@/db/seed'
 import type { DailyGoals, DailyLogEntry, Macros } from '@/types'
 import { uuidv7 } from 'uuidv7'
 import { today } from '@/utils/date'
-import { sumMacros } from '@/utils/macros'
+import { percentOfGoal, sumMacros } from '@/utils/macros'
 
 export const useDailyLogStore = defineStore('dailyLog', () => {
   const currentDate = ref(today())
@@ -29,10 +29,10 @@ export const useDailyLogStore = defineStore('dailyLog', () => {
   }))
 
   const progressPercentages = computed(() => ({
-    calories: Math.round((dailyTotals.value.calories / goals.value.calories) * 100),
-    protein: Math.round((dailyTotals.value.protein / goals.value.protein) * 100),
-    carbsTotal: Math.round((dailyTotals.value.carbsTotal / goals.value.carbsTotal) * 100),
-    fat: Math.round((dailyTotals.value.fat / goals.value.fat) * 100),
+    calories: percentOfGoal(dailyTotals.value.calories, goals.value.calories),
+    protein: percentOfGoal(dailyTotals.value.protein, goals.value.protein),
+    carbsTotal: percentOfGoal(dailyTotals.value.carbsTotal, goals.value.carbsTotal),
+    fat: percentOfGoal(dailyTotals.value.fat, goals.value.fat),
   }))
 
   async function loadGoals() {

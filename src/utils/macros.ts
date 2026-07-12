@@ -46,3 +46,8 @@ export function addMacros(a: Macros, b: Macros): Macros {
 export function sumMacros(items: Macros[]): Macros {
   return items.reduce(addMacros, emptyMacros())
 }
+
+// Guards against a zero goal, which would otherwise render Infinity%/NaN%.
+export function percentOfGoal(total: number, goal: number): number {
+  return goal > 0 ? Math.round((total / goal) * 100) : 0
+}

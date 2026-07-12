@@ -60,7 +60,7 @@ Log entries, foods, and meal templates are deleted instantly on a single small i
 
 `validateMacros(parsed.mainCourse.macros, …)` is called without checking that `macros` exists (`openai.ts:126`, `:133`, `:192`). If the model omits it, `obj[field]` throws `TypeError: Cannot read properties of undefined`, and that raw message is what the snackbar shows the user. Same for `JSON.parse` failures at line 55 ("Unexpected token…"). Guard `obj` at the top of `validateMacros` and wrap the parse with a friendly "AI returned an unexpected response" error.
 
-### [ ] 7. Division by zero when a goal is 0
+### [x] 7. Division by zero when a goal is 0
 
 `src/stores/dailyLog.ts:42-47`, `WeeklyAverageCard.vue:14`
 
