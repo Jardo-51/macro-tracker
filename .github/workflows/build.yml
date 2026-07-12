@@ -29,4 +29,5 @@ jobs:
           nix develop --command bash -c "
             pnpm install --frozen-lockfile
             pnpm build
+            pnpm test
           "

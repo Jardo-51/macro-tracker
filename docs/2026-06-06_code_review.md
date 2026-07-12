@@ -84,7 +84,7 @@ The identical `loadGoals()` + `currentDate < today() ? today() : undefined` danc
 
 The same four hex colors are defined in the Vuetify theme (`macro-*`), again in `macroOptions`, and a third time in `colorMap` within the same component (`macroOptions` alone could serve both uses). A theme change now requires edits in three places. Export a single `MACRO_COLORS` constant, or pull the values from the Vuetify theme at runtime.
 
-### [ ] 11. No tests, and no test infrastructure
+### [x] 11. No tests, and no test infrastructure
 
 There's genuinely testable pure logic here — `date.ts`, `aggregateByDate`, `compareByRecency`, the import validators, the OpenAI response parsing — all cheap to cover with Vitest and exactly the code where regressions would be silent (timezone math, aggregation). Worth setting up before the app grows further.
 
