@@ -24,8 +24,8 @@
         &middot; F {{ food.macros.fat }}g
       </v-list-item-subtitle>
       <template #append>
-        <v-btn icon="mdi-pencil-outline" variant="text" size="small" @click="emit('edit', food)" />
-        <v-btn icon="mdi-delete-outline" variant="text" size="small" @click="deleteFood(food)" />
+        <v-btn icon="mdi-pencil-outline" aria-label="Edit food" variant="text" size="small" @click="emit('edit', food)" />
+        <v-btn icon="mdi-delete-outline" aria-label="Delete food" variant="text" size="small" @click="deleteFood(food)" />
       </template>
     </v-list-item>
   </v-list>

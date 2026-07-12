@@ -119,7 +119,7 @@ There's genuinely testable pure logic here — `date.ts`, `aggregateByDate`, `co
 
 Semicolons, one-space indent, and imports placed above the file comment, unlike every other file. Also `EditEntryDialog`'s inline multiply vs. the named helper elsewhere.
 
-### [ ] 19. Icon-only buttons lack accessible names
+### [x] 19. Icon-only buttons lack accessible names
 
 The edit/delete/FAB/AI buttons have tooltips at best; add `aria-label` so screen readers announce them.
 

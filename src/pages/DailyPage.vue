@@ -1,11 +1,11 @@
 <template>
   <v-container>
     <div class="d-flex align-center justify-space-between mb-4">
-      <v-btn icon variant="text" @click="goToPreviousDay">
+      <v-btn icon aria-label="Previous day" variant="text" @click="goToPreviousDay">
         <v-icon>mdi-chevron-left</v-icon>
       </v-btn>
       <h1 class="text-h5">{{ displayDate }}</h1>
-      <v-btn icon variant="text" :disabled="isToday" @click="goToNextDay">
+      <v-btn icon aria-label="Next day" variant="text" :disabled="isToday" @click="goToNextDay">
         <v-icon>mdi-chevron-right</v-icon>
       </v-btn>
     </div>

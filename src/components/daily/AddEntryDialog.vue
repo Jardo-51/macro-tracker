@@ -1,6 +1,7 @@
 <template>
   <v-fab
     icon="mdi-plus"
+    aria-label="Add entry"
     color="primary"
     location="bottom end"
     style="position: fixed; bottom: 64px; right: 16px"

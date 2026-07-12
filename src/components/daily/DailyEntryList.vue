@@ -22,12 +22,14 @@
         <template #append>
           <v-btn
             icon="mdi-pencil-outline"
+            aria-label="Edit entry"
             variant="text"
             size="small"
             @click="editDialog?.open(entry)"
           />
           <v-btn
             icon="mdi-delete-outline"
+            aria-label="Delete entry"
             variant="text"
             size="small"
             @click="removeEntry(entry)"
