@@ -2,10 +2,10 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { db } from '@/db'
 import { seedDefaults } from '@/db/seed'
-import { emptyMacros } from '@/types'
 import type { DailyGoals, DailyLogEntry, Macros } from '@/types'
 import { uuidv7 } from 'uuidv7'
 import { today } from '@/utils/date'
+import { sumMacros } from '@/utils/macros'
 
 export const useDailyLogStore = defineStore('dailyLog', () => {
   const currentDate = ref(today())
@@ -19,18 +19,7 @@ export const useDailyLogStore = defineStore('dailyLog', () => {
   })
   const isLoading = ref(false)
 
-  const dailyTotals = computed<Macros>(() => {
-    const totals = emptyMacros()
-    for (const entry of entries.value) {
-      totals.calories += entry.macros.calories
-      totals.protein += entry.macros.protein
-      totals.carbsTotal += entry.macros.carbsTotal
-      totals.carbsFiber += entry.macros.carbsFiber
-      totals.carbsSugar += entry.macros.carbsSugar
-      totals.fat += entry.macros.fat
-    }
-    return totals
-  })
+  const dailyTotals = computed<Macros>(() => sumMacros(entries.value.map(e => e.macros)))
 
   const remainingMacros = computed(() => ({
     calories: goals.value.calories - dailyTotals.value.calories,

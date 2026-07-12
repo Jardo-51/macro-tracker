@@ -21,7 +21,7 @@ Each table is cleared and then re-filled as separate, unrelated operations. `val
 
 ## HIGH
 
-### [ ] 2. Numeric form inputs are never validated — strings, `NaN`, and negatives get persisted to IndexedDB
+### [x] 2. Numeric form inputs are never validated — strings, `NaN`, and negatives get persisted to IndexedDB
 
 `v-model.number` falls back to the *raw string* when the input isn't parseable (and an emptied field yields `''`). None of the forms validate before saving:
 
@@ -48,7 +48,7 @@ Log entries, foods, and meal templates are deleted instantly on a single small i
 
 `fetch` without an `AbortSignal` can hang for minutes on flaky mobile networks, leaving the button spinner stuck with no way out. Add `signal: AbortSignal.timeout(60_000)` and map the abort to a friendly message.
 
-### [ ] 5. Macro arithmetic is copy-pasted in six places and has already drifted
+### [x] 5. Macro arithmetic is copy-pasted in six places and has already drifted
 
 `multiplyMacros` exists three times (`AddEntryDialog.vue:252`, `FoodItemDialog.vue:104`, `EditEntryDialog.vue:78`) and the `EditEntryDialog` copy **forgot the `Math.round`**, so edited entries can hold fractional macros while everything else is integer — the drift the duplication invites has already happened. Per-field summation loops are likewise repeated in `dailyLog.ts:22-33`, `history.ts:19-40` (twice), and `openai.ts:147-154`.
 

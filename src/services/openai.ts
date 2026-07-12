@@ -1,4 +1,5 @@
 import type { Macros, MenuRecommendation, SnackSuggestion } from '@/types'
+import { addMacros } from '@/utils/macros'
 
 type TextPart = { type: 'text'; text: string }
 type ImagePart = { type: 'image_url'; image_url: { url: string; detail?: 'low' | 'high' | 'auto' } }
@@ -144,14 +145,9 @@ export async function recommendFromMenu(
     macros: roundMacros(parsed.mainCourse.macros),
   }
 
-  const combinedMacros: Macros = {
-    calories: mainCourse.macros.calories + (soup?.macros.calories ?? 0),
-    protein: mainCourse.macros.protein + (soup?.macros.protein ?? 0),
-    carbsTotal: mainCourse.macros.carbsTotal + (soup?.macros.carbsTotal ?? 0),
-    carbsFiber: mainCourse.macros.carbsFiber + (soup?.macros.carbsFiber ?? 0),
-    carbsSugar: mainCourse.macros.carbsSugar + (soup?.macros.carbsSugar ?? 0),
-    fat: mainCourse.macros.fat + (soup?.macros.fat ?? 0),
-  }
+  const combinedMacros: Macros = soup
+    ? addMacros(mainCourse.macros, soup.macros)
+    : { ...mainCourse.macros }
 
   return {
     soup,

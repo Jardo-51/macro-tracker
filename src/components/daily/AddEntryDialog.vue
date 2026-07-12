@@ -179,6 +179,7 @@
   import { useExtractMacrosFromLabel } from '@/composables/useExtractMacrosFromLabel'
   import { emptyMacros } from '@/types'
   import type { FoodItem, MealTemplate } from '@/types'
+  import { multiplyMacros, sanitizeMacros, toFiniteNonNegative } from '@/utils/macros'
 
   const dailyLog = useDailyLogStore()
   const foodsStore = useFoodsStore()
@@ -206,7 +207,10 @@
   const multiplier = ref(1)
 
   function applyMultiplier() {
-    macros.value = multiplyMacros(macros.value, multiplier.value)
+    const factor = toFiniteNonNegative(multiplier.value)
+    if (factor > 0) {
+      macros.value = multiplyMacros(sanitizeMacros(macros.value), factor)
+    }
     multiplier.value = 1
   }
 
@@ -249,41 +253,32 @@
     selectedMeal.value = meal
   }
 
-  function multiplyMacros(m: typeof macros.value, factor: number) {
-    return {
-      calories: Math.round(m.calories * factor),
-      protein: Math.round(m.protein * factor),
-      carbsTotal: Math.round(m.carbsTotal * factor),
-      carbsFiber: Math.round(m.carbsFiber * factor),
-      carbsSugar: Math.round(m.carbsSugar * factor),
-      fat: Math.round(m.fat * factor),
-    }
-  }
-
   async function save() {
     if (tab.value === 'manual') {
+      const cleanMacros = sanitizeMacros(macros.value)
       await dailyLog.addEntry({
         date: dailyLog.currentDate,
         name: name.value.trim(),
         servings: 1,
-        macros: { ...macros.value },
+        macros: cleanMacros,
         sourceType: 'manual',
       })
       if (saveAsFood.value) {
         await foodsStore.addFoodItem({
           name: name.value.trim(),
-          servingSize: servingSize.value,
+          servingSize: toFiniteNonNegative(servingSize.value),
           servingUnit: servingUnit.value,
-          macros: { ...macros.value },
+          macros: { ...cleanMacros },
         })
       }
     } else if (tab.value === 'foods' && selectedFood.value) {
       const food = selectedFood.value
+      const servings = toFiniteNonNegative(foodServings.value)
       await dailyLog.addEntry({
         date: dailyLog.currentDate,
         name: food.name,
-        servings: foodServings.value,
-        macros: multiplyMacros(food.macros, foodServings.value),
+        servings,
+        macros: multiplyMacros(food.macros, servings),
         sourceType: 'food',
         sourceId: food.id,
       })

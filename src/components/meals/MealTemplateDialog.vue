@@ -31,6 +31,7 @@
   import { useFoodsStore } from '@/stores/foods'
   import { emptyMacros } from '@/types'
   import type { MealTemplate } from '@/types'
+  import { sanitizeMacros } from '@/utils/macros'
 
   const store = useFoodsStore()
 
@@ -66,13 +67,13 @@
       await store.updateMealTemplate({
         id: editId.value,
         name: form.name.trim(),
-        macros: { ...form.macros },
+        macros: sanitizeMacros(form.macros),
         createdAt: editCreatedAt.value,
       })
     } else {
       await store.addMealTemplate({
         name: form.name.trim(),
-        macros: { ...form.macros },
+        macros: sanitizeMacros(form.macros),
       })
     }
     emit('saved')

@@ -4,6 +4,7 @@ import { db } from '@/db'
 import { emptyMacros } from '@/types'
 import type { DailyLogEntry, Macros } from '@/types'
 import { toLocalDateStr } from '@/utils/date'
+import { multiplyMacros, sumMacros } from '@/utils/macros'
 
 interface DayData {
   date: string
@@ -19,24 +20,7 @@ export const useHistoryStore = defineStore('history', () => {
   const weeklyAverages = computed<Macros>(() => {
     const days = weeklyData.value.filter(d => d.entries.length > 0)
     if (days.length === 0) return emptyMacros()
-    const totals = emptyMacros()
-    for (const day of days) {
-      totals.calories += day.totals.calories
-      totals.protein += day.totals.protein
-      totals.carbsTotal += day.totals.carbsTotal
-      totals.carbsFiber += day.totals.carbsFiber
-      totals.carbsSugar += day.totals.carbsSugar
-      totals.fat += day.totals.fat
-    }
-    const count = days.length
-    return {
-      calories: Math.round(totals.calories / count),
-      protein: Math.round(totals.protein / count),
-      carbsTotal: Math.round(totals.carbsTotal / count),
-      carbsFiber: Math.round(totals.carbsFiber / count),
-      carbsSugar: Math.round(totals.carbsSugar / count),
-      fat: Math.round(totals.fat / count),
-    }
+    return multiplyMacros(sumMacros(days.map(d => d.totals)), 1 / days.length)
   })
 
   const trendData = computed(() => {
@@ -71,18 +55,11 @@ export const useHistoryStore = defineStore('history', () => {
 
     return Array.from(map.entries())
       .sort(([a], [b]) => a.localeCompare(b))
-      .map(([date, dayEntries]) => {
-        const totals = emptyMacros()
-        for (const e of dayEntries) {
-          totals.calories += e.macros.calories
-          totals.protein += e.macros.protein
-          totals.carbsTotal += e.macros.carbsTotal
-          totals.carbsFiber += e.macros.carbsFiber
-          totals.carbsSugar += e.macros.carbsSugar
-          totals.fat += e.macros.fat
-        }
-        return { date, entries: dayEntries, totals }
-      })
+      .map(([date, dayEntries]) => ({
+        date,
+        entries: dayEntries,
+        totals: sumMacros(dayEntries.map(e => e.macros)),
+      }))
   }
 
   async function loadRangeData(days: number) {
