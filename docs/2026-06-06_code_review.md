@@ -66,7 +66,7 @@ Log entries, foods, and meal templates are deleted instantly on a single small i
 
 Nothing prevents saving a goal of 0 (or the `''` case from finding 2), and both the progress percentages and the weekly-average percentages render `Infinity%`/`NaN%`. Guard with `goal > 0 ? … : 0`.
 
-### [ ] 8. `index.html` has no cache-control header
+### [x] 8. `index.html` has no cache-control header
 
 `public/.htaccess`
 
