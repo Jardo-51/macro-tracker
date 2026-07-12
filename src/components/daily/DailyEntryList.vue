@@ -76,7 +76,7 @@
     await store.removeEntry(entry.id)
     app.showSnackbar(`Deleted "${entry.name}"`, 'success', {
       label: 'Undo',
-      handler: () => store.restoreEntry(entry),
+      handler: () => store.restoreEntry(entry).catch(() => app.showSnackbar('Failed to restore entry', 'error')),
     })
   }
 </script>

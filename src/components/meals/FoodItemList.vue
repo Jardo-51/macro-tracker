@@ -47,7 +47,7 @@
     await store.deleteFoodItem(food.id)
     app.showSnackbar(`Deleted "${food.name}"`, 'success', {
       label: 'Undo',
-      handler: () => store.restoreFoodItem(food),
+      handler: () => store.restoreFoodItem(food).catch(() => app.showSnackbar('Failed to restore food', 'error')),
     })
   }
 </script>

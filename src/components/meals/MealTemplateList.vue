@@ -46,7 +46,7 @@
     await store.deleteMealTemplate(meal.id)
     app.showSnackbar(`Deleted "${meal.name}"`, 'success', {
       label: 'Undo',
-      handler: () => store.restoreMealTemplate(meal),
+      handler: () => store.restoreMealTemplate(meal).catch(() => app.showSnackbar('Failed to restore meal', 'error')),
     })
   }
 </script>
