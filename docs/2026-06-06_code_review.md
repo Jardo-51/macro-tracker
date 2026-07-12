@@ -111,7 +111,7 @@ There's genuinely testable pure logic here — `date.ts`, `aggregateByDate`, `co
 
 `src/stores/foods.ts:116` — it's a pure helper; export it from the module (or `utils/`) instead of routing it through Pinia.
 
-### [ ] 17. Double rounding
+### [x] 17. Double rounding
 
 `DailySummaryCard.vue:18` wraps `store.progressPercentages` in `Math.round` although the store already rounds (`dailyLog.ts:43-46`).
 
