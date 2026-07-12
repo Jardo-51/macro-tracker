@@ -57,10 +57,17 @@ async function chatCompletion(messages: ChatMessage[], apiKey: string): Promise<
     throw new Error('Unexpected response from OpenAI')
   }
 
-  return JSON.parse(content)
+  try {
+    return JSON.parse(content)
+  } catch {
+    throw new Error('AI returned an unexpected response. Please try again.')
+  }
 }
 
 function validateMacros(obj: any, label: string): void {
+  if (!obj || typeof obj !== 'object') {
+    throw new Error(`Invalid response: missing "macros" in ${label}`)
+  }
   for (const field of MACRO_FIELDS) {
     if (typeof obj[field] !== 'number') {
       throw new Error(`Invalid response: missing or non-numeric "${field}" in ${label}`)

@@ -54,7 +54,7 @@ Log entries, foods, and meal templates are deleted instantly on a single small i
 
 **Fix:** extract `multiplyMacros`, `addMacros`/`sumMacros` into `src/utils/macros.ts` next to `emptyMacros()`.
 
-### [ ] 6. Malformed AI responses surface as raw TypeErrors
+### [x] 6. Malformed AI responses surface as raw TypeErrors
 
 `src/services/openai.ts:58-64`
 
