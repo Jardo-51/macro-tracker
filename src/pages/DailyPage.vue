@@ -36,9 +36,5 @@
     store.loadDate(addDays(store.currentDate, 1))
   }
 
-  onMounted(async () => {
-    await store.loadGoals()
-    const dateToLoad = store.currentDate < today() ? today() : undefined
-    await store.loadDate(dateToLoad)
-  })
+  onMounted(() => store.ensureFreshToday())
 </script>

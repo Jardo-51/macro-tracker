@@ -72,7 +72,7 @@ Nothing prevents saving a goal of 0 (or the `''` case from finding 2), and both 
 
 JS/CSS/fonts are `immutable`, and `sw.js` is `no-cache` — good — but `index.html` itself gets Apache defaults, so intermediate caches / browser heuristics may serve a stale shell referencing hashed assets. The service worker masks this for repeat visitors, but the first uncontrolled load and the SW-update path both fetch `index.html` over the network. Add a `<Files "index.html">` block with `no-cache`.
 
-### [ ] 9. Duplicated "snap back to today" bootstrap logic
+### [x] 9. Duplicated "snap back to today" bootstrap logic
 
 `DailyPage.vue:39-43` and `RecommendPage.vue:184-188`
 

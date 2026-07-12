@@ -47,6 +47,14 @@ export const useDailyLogStore = defineStore('dailyLog', () => {
     goals.value = updated
   }
 
+  // Page bootstrap: load goals and the current day's entries, snapping back
+  // to today if the store still points at a stale (past) date from an
+  // earlier session.
+  async function ensureFreshToday() {
+    await loadGoals()
+    await loadDate(currentDate.value < today() ? today() : undefined)
+  }
+
   async function loadDate(date?: string) {
     isLoading.value = true
     if (date) currentDate.value = date
@@ -108,6 +116,7 @@ export const useDailyLogStore = defineStore('dailyLog', () => {
     progressPercentages,
     loadGoals,
     updateGoals,
+    ensureFreshToday,
     loadDate,
     addEntry,
     removeEntry,

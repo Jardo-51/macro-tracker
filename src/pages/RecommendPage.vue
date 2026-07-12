@@ -167,7 +167,6 @@
   import { useDailyLogStore } from '@/stores/dailyLog'
   import { useAppStore } from '@/stores/app'
   import { recommendFromMenu, suggestSnacks } from '@/services/openai'
-  import { today } from '@/utils/date'
   import { emptyMacros } from '@/types'
   import type { MenuRecommendation, RecommendedItem, SnackSuggestion } from '@/types'
 
@@ -181,11 +180,7 @@
   const recommendation = ref<MenuRecommendation | null>(null)
   const snacks = ref<SnackSuggestion[]>([])
 
-  onMounted(async () => {
-    await dailyLog.loadGoals()
-    const dateToLoad = dailyLog.currentDate < today() ? today() : undefined
-    await dailyLog.loadDate(dateToLoad)
-  })
+  onMounted(() => dailyLog.ensureFreshToday())
 
   async function getRecommendation() {
     loading.value = true
