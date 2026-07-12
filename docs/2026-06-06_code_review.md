@@ -115,7 +115,7 @@ There's genuinely testable pure logic here — `date.ts`, `aggregateByDate`, `co
 
 `DailySummaryCard.vue:18` wraps `store.progressPercentages` in `Math.round` although the store already rounds (`dailyLog.ts:43-46`).
 
-### [ ] 18. `plugins/index.ts` style drift
+### [x] 18. `plugins/index.ts` style drift
 
 Semicolons, one-space indent, and imports placed above the file comment, unlike every other file. Also `EditEntryDialog`'s inline multiply vs. the named helper elsewhere.
 
