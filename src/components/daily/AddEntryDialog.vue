@@ -173,7 +173,7 @@
   import AiEstimateButton from './AiEstimateButton.vue'
   import ScanLabelButton from './ScanLabelButton.vue'
   import { useDailyLogStore } from '@/stores/dailyLog'
-  import { useFoodsStore } from '@/stores/foods'
+  import { filterByName, useFoodsStore } from '@/stores/foods'
   import { useAppStore } from '@/stores/app'
   import { useEstimateMacros } from '@/composables/useEstimateMacros'
   import { useExtractMacrosFromLabel } from '@/composables/useExtractMacrosFromLabel'
@@ -224,11 +224,11 @@
   const selectedMeal = ref<MealTemplate | null>(null)
 
   const filteredFoods = computed(() =>
-    foodsStore.filterByName(foodsStore.recentFoodItems, foodSearch.value)
+    filterByName(foodsStore.recentFoodItems, foodSearch.value)
   )
 
   const filteredMeals = computed(() =>
-    foodsStore.filterByName(foodsStore.recentMealTemplates, mealSearch.value)
+    filterByName(foodsStore.recentMealTemplates, mealSearch.value)
   )
 
   const canSave = computed(() => {

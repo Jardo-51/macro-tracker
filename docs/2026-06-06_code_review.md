@@ -107,7 +107,7 @@ There's genuinely testable pure logic here — `date.ts`, `aggregateByDate`, `co
 
 `src/stores/app.ts:11-15` — if a snackbar is already open, `showSnackbar` just swaps the text; the 3s timeout from the first message keeps ticking. Toggle `snackbar.value = false` then `true` on `nextTick`.
 
-### [ ] 16. `filterByName` returned as a store action
+### [x] 16. `filterByName` returned as a store action
 
 `src/stores/foods.ts:116` — it's a pure helper; export it from the module (or `utils/`) instead of routing it through Pinia.
 

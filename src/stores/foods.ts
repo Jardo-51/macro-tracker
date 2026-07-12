@@ -19,7 +19,7 @@ function compareByRecency(
   return b.createdAt.localeCompare(a.createdAt)
 }
 
-function filterByName<T extends FoodItem | MealTemplate>(
+export function filterByName<T extends FoodItem | MealTemplate>(
   items: T[],
   query: string,
 ): T[] {
@@ -127,6 +127,5 @@ export const useFoodsStore = defineStore('foods', () => {
     updateMealTemplate,
     deleteMealTemplate,
     restoreMealTemplate,
-    filterByName,
   }
 })
