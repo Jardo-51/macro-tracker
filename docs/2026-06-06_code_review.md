@@ -123,7 +123,7 @@ Semicolons, one-space indent, and imports placed above the file comment, unlike 
 
 The edit/delete/FAB/AI buttons have tooltips at best; add `aria-label` so screen readers announce them.
 
-### [ ] 20. Deploy rsync never deletes
+### [x] 20. Deploy rsync never deletes
 
 `.github/workflows/deploy.yml` — without `--delete`, old hashed bundles accumulate on the server forever. (Deliberately keeping one previous generation is fine, but unbounded growth probably isn't intended.)
 
