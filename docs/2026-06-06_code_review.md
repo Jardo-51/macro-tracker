@@ -11,7 +11,7 @@ Severity legend:
 
 ## CRITICAL
 
-### [ ] 1. Import can permanently destroy all user data — `clear()` and `bulkAdd()` run outside a transaction
+### [x] 1. Import can permanently destroy all user data — `clear()` and `bulkAdd()` run outside a transaction
 
 `src/components/settings/DataManagement.vue:213-228`
 
