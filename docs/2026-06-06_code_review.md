@@ -90,9 +90,10 @@ There's genuinely testable pure logic here — `date.ts`, `aggregateByDate`, `co
 
 ## LOW
 
-### [ ] 12. API key in `localStorage`
+### [x] 12. API key in `localStorage`
 
 `src/stores/app.ts:9` — readable by any successful XSS; the strict CSP makes exploitation unlikely, and there's no server to hold it instead, so this is an accepted-risk note rather than a demand — but the About/AI settings copy could warn users to use a low-limit, scoped key.
+> Note: This will change to a backend AI provider in a future PR, no need to address it now.
 
 ### [ ] 13. Label-scan serving size is dropped if "Save as custom food" is checked *after* scanning
 
