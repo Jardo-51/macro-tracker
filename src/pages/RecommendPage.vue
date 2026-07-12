@@ -140,7 +140,7 @@
 
     <template v-if="snacks.length > 0">
       <h2 class="text-subtitle-1 font-weight-bold mb-3">Suggested Snacks</h2>
-      <v-card v-for="snack in snacks" :key="snack.name" class="mb-4">
+      <v-card v-for="(snack, i) in snacks" :key="i" class="mb-4">
         <v-card-title class="text-body-1">{{ snack.name }}</v-card-title>
         <v-card-text>
           <div class="d-flex flex-wrap ga-2 mb-2">

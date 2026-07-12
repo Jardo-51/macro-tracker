@@ -99,7 +99,7 @@ There's genuinely testable pure logic here — `date.ts`, `aggregateByDate`, `co
 
 `AddEntryDialog.vue:192-195` — the scanned `servingSize`/`servingUnit` are only applied when the checkbox is already ticked at scan time. Store them unconditionally and let the checkbox merely control visibility.
 
-### [ ] 14. Snack cards keyed by name
+### [x] 14. Snack cards keyed by name
 
 `RecommendPage.vue:143` — the model can return duplicate names → duplicate `:key` warning and glitchy re-render. Key by index or a generated id.
 
