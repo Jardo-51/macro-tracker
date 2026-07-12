@@ -32,7 +32,7 @@ Each table is cleared and then re-filled as separate, unrelated operations. `val
 
 **Fix centrally:** a small sanitizer (`toFiniteNonNegative(v): number`) applied in `save()`/`applyMultiplier`, or validation rules + a form-level guard on the Save buttons. The existing import validator (`isFiniteNum`) shows the right instinct — the UI paths just never got the same rigor.
 
-### [ ] 3. One-tap irreversible deletes with no confirmation or undo
+### [x] 3. One-tap irreversible deletes with no confirmation or undo
 
 `DailyEntryList.vue:29-34`, `FoodItemList.vue:28`, `MealTemplateList.vue:27`
 

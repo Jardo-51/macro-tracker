@@ -82,6 +82,13 @@ export const useDailyLogStore = defineStore('dailyLog', () => {
     entries.value = entries.value.filter(e => e.id !== id)
   }
 
+  // Re-inserts a previously deleted entry as-is (id and createdAt preserved),
+  // used by the delete-undo snackbar.
+  async function restoreEntry(entry: DailyLogEntry) {
+    await db.dailyLogEntries.add(entry)
+    if (entry.date === currentDate.value) await loadDate()
+  }
+
   async function updateEntry(id: string, changes: Pick<DailyLogEntry, 'name' | 'macros' | 'servings'>) {
     const existing = entries.value.find(e => e.id === id)
     if (!existing) return
@@ -104,6 +111,7 @@ export const useDailyLogStore = defineStore('dailyLog', () => {
     loadDate,
     addEntry,
     removeEntry,
+    restoreEntry,
     updateEntry,
   }
 })

@@ -10,6 +10,11 @@
       :timeout="3000"
     >
       {{ app.snackbarText }}
+      <template v-if="app.snackbarAction" #actions>
+        <v-btn variant="text" @click="runSnackbarAction">
+          {{ app.snackbarAction.label }}
+        </v-btn>
+      </template>
     </v-snackbar>
   </v-app>
 </template>
@@ -26,4 +31,9 @@
   watch(() => app.darkMode, (dark) => {
     theme.global.name.value = dark ? 'dark' : 'light'
   }, { immediate: true })
+
+  function runSnackbarAction() {
+    app.snackbarAction?.handler()
+    app.snackbar = false
+  }
 </script>

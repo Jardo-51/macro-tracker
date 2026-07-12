@@ -75,6 +75,13 @@ export const useFoodsStore = defineStore('foods', () => {
     foodItems.value = foodItems.value.filter(f => f.id !== id)
   }
 
+  // Re-inserts a previously deleted item as-is (id and createdAt preserved),
+  // used by the delete-undo snackbar.
+  async function restoreFoodItem(item: FoodItem) {
+    await db.foodItems.add(item)
+    await loadFoodItems()
+  }
+
   async function addMealTemplate(template: Omit<MealTemplate, 'id' | 'createdAt'>) {
     const newTemplate: MealTemplate = {
       ...template,
@@ -96,6 +103,11 @@ export const useFoodsStore = defineStore('foods', () => {
     mealTemplates.value = mealTemplates.value.filter(m => m.id !== id)
   }
 
+  async function restoreMealTemplate(template: MealTemplate) {
+    await db.mealTemplates.add(template)
+    await loadMealTemplates()
+  }
+
   return {
     foodItems,
     mealTemplates,
@@ -110,9 +122,11 @@ export const useFoodsStore = defineStore('foods', () => {
     addFoodItem,
     updateFoodItem,
     deleteFoodItem,
+    restoreFoodItem,
     addMealTemplate,
     updateMealTemplate,
     deleteMealTemplate,
+    restoreMealTemplate,
     filterByName,
   }
 })

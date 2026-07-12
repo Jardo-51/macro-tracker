@@ -30,7 +30,7 @@
             icon="mdi-delete-outline"
             variant="text"
             size="small"
-            @click="removeEntry(entry.id)"
+            @click="removeEntry(entry)"
           />
         </template>
       </v-list-item>
@@ -46,9 +46,12 @@
 <script lang="ts" setup>
   import { ref } from 'vue'
   import { useDailyLogStore } from '@/stores/dailyLog'
+  import { useAppStore } from '@/stores/app'
+  import type { DailyLogEntry } from '@/types'
   import EditEntryDialog from './EditEntryDialog.vue'
 
   const store = useDailyLogStore()
+  const app = useAppStore()
   const editDialog = ref<InstanceType<typeof EditEntryDialog> | null>(null)
 
   function sourceIcon(type: string) {
@@ -67,8 +70,12 @@
     }
   }
 
-  async function removeEntry(id: string) {
-    await store.removeEntry(id)
+  async function removeEntry(entry: DailyLogEntry) {
+    await store.removeEntry(entry.id)
+    app.showSnackbar(`Deleted "${entry.name}"`, 'success', {
+      label: 'Undo',
+      handler: () => store.restoreEntry(entry),
+    })
   }
 </script>
 

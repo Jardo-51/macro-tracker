@@ -25,7 +25,7 @@
       </v-list-item-subtitle>
       <template #append>
         <v-btn icon="mdi-pencil-outline" variant="text" size="small" @click="emit('edit', food)" />
-        <v-btn icon="mdi-delete-outline" variant="text" size="small" @click="deleteFood(food.id)" />
+        <v-btn icon="mdi-delete-outline" variant="text" size="small" @click="deleteFood(food)" />
       </template>
     </v-list-item>
   </v-list>
@@ -36,12 +36,18 @@
 
 <script lang="ts" setup>
   import { useFoodsStore } from '@/stores/foods'
+  import { useAppStore } from '@/stores/app'
   import type { FoodItem } from '@/types'
 
   const store = useFoodsStore()
+  const app = useAppStore()
   const emit = defineEmits<{ edit: [item: FoodItem] }>()
 
-  async function deleteFood(id: string) {
-    await store.deleteFoodItem(id)
+  async function deleteFood(food: FoodItem) {
+    await store.deleteFoodItem(food.id)
+    app.showSnackbar(`Deleted "${food.name}"`, 'success', {
+      label: 'Undo',
+      handler: () => store.restoreFoodItem(food),
+    })
   }
 </script>
