@@ -51,6 +51,7 @@
   } from 'chart.js'
   import { useHistoryStore } from '@/stores/history'
   import { useDailyLogStore } from '@/stores/dailyLog'
+  import { MACRO_COLORS } from '@/plugins/vuetify'
   import { useTheme } from 'vuetify'
 
   ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler)
@@ -68,18 +69,13 @@
   const selectedMacros = ref(['calories'])
 
   const macroOptions = [
-    { key: 'calories', label: 'Calories', color: '#FFB300' },
-    { key: 'protein', label: 'Protein', color: '#1E88E5' },
-    { key: 'carbs', label: 'Carbs', color: '#43A047' },
-    { key: 'fat', label: 'Fat', color: '#FB8C00' },
+    { key: 'calories', label: 'Calories', color: MACRO_COLORS.calories },
+    { key: 'protein', label: 'Protein', color: MACRO_COLORS.protein },
+    { key: 'carbs', label: 'Carbs', color: MACRO_COLORS.carbs },
+    { key: 'fat', label: 'Fat', color: MACRO_COLORS.fat },
   ]
 
-  const colorMap: Record<string, string> = {
-    calories: '#FFB300',
-    protein: '#1E88E5',
-    carbs: '#43A047',
-    fat: '#FB8C00',
-  }
+  const colorMap: Record<string, string> = MACRO_COLORS
 
   const goalMap = computed(() => ({
     calories: dailyLogStore.goals.calories,

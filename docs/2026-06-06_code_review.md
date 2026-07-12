@@ -78,7 +78,7 @@ JS/CSS/fonts are `immutable`, and `sw.js` is `no-cache` — good — but `index.
 
 The identical `loadGoals()` + `currentDate < today() ? today() : undefined` dance lives in two pages. It belongs in the store (e.g., `dailyLog.ensureFreshToday()`), so the next page that needs it can't get it subtly wrong. Related quirk: opening Recommend silently changes which day the Daily page shows.
 
-### [ ] 10. Chart palette duplicated, in triplicate
+### [x] 10. Chart palette duplicated, in triplicate
 
 `TrendChart.vue:70-82` and `src/plugins/vuetify.ts:10-23`
 
