@@ -127,7 +127,7 @@ The edit/delete/FAB/AI buttons have tooltips at best; add `aria-label` so screen
 
 `.github/workflows/deploy.yml` — without `--delete`, old hashed bundles accumulate on the server forever. (Deliberately keeping one previous generation is fine, but unbounded growth probably isn't intended.)
 
-### [ ] 21. `v-list` wrapping expansion panels
+### [x] 21. `v-list` wrapping expansion panels
 
 `DailyHistoryList.vue:4` wraps `v-expansion-panels` in a `v-list` for no layout benefit, and the card renders header-only (no empty-state text) before data loads.
 
