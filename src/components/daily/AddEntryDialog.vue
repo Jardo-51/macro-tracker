@@ -209,9 +209,11 @@
 
   function applyMultiplier() {
     const factor = toFiniteNonNegative(multiplier.value)
-    if (factor > 0) {
-      macros.value = multiplyMacros(sanitizeMacros(macros.value), factor)
+    if (factor <= 0) {
+      appStore.showSnackbar('Enter a multiplier greater than 0', 'error')
+      return
     }
+    macros.value = multiplyMacros(sanitizeMacros(macros.value), factor)
     multiplier.value = 1
   }
 

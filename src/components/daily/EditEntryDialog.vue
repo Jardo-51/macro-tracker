@@ -52,12 +52,14 @@
   import MacroInputFields from './MacroInputFields.vue'
   import AiEstimateButton from './AiEstimateButton.vue'
   import { useDailyLogStore } from '@/stores/dailyLog'
+  import { useAppStore } from '@/stores/app'
   import { useEstimateMacros } from '@/composables/useEstimateMacros'
   import { emptyMacros } from '@/types'
   import type { DailyLogEntry } from '@/types'
   import { multiplyMacros, sanitizeMacros, toFiniteNonNegative } from '@/utils/macros'
 
   const dailyLog = useDailyLogStore()
+  const appStore = useAppStore()
   const { estimating, estimate } = useEstimateMacros()
 
   const dialog = ref(false)
@@ -78,9 +80,11 @@
 
   function applyMultiplier() {
     const factor = toFiniteNonNegative(multiplier.value)
-    if (factor > 0) {
-      macros.value = multiplyMacros(sanitizeMacros(macros.value), factor)
+    if (factor <= 0) {
+      appStore.showSnackbar('Enter a multiplier greater than 0', 'error')
+      return
     }
+    macros.value = multiplyMacros(sanitizeMacros(macros.value), factor)
     multiplier.value = 1
   }
 

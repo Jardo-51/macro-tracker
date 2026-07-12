@@ -76,12 +76,14 @@
   import MacroInputFields from '@/components/daily/MacroInputFields.vue'
   import ScanLabelButton from '@/components/daily/ScanLabelButton.vue'
   import { useFoodsStore } from '@/stores/foods'
+  import { useAppStore } from '@/stores/app'
   import { useExtractMacrosFromLabel } from '@/composables/useExtractMacrosFromLabel'
   import { emptyMacros } from '@/types'
   import type { FoodItem } from '@/types'
   import { multiplyMacros, sanitizeMacros, toFiniteNonNegative } from '@/utils/macros'
 
   const store = useFoodsStore()
+  const appStore = useAppStore()
   const { extracting, extract } = useExtractMacrosFromLabel()
 
   function onLabelScanned(imageDataUrl: string) {
@@ -104,10 +106,12 @@
 
   function applyMultiplier() {
     const factor = toFiniteNonNegative(multiplier.value)
-    if (factor > 0) {
-      form.macros = multiplyMacros(sanitizeMacros(form.macros), factor)
-      form.servingSize = Math.round(toFiniteNonNegative(form.servingSize) * factor)
+    if (factor <= 0) {
+      appStore.showSnackbar('Enter a multiplier greater than 0', 'error')
+      return
     }
+    form.macros = multiplyMacros(sanitizeMacros(form.macros), factor)
+    form.servingSize = Math.round(toFiniteNonNegative(form.servingSize) * factor)
     multiplier.value = 1
   }
 
