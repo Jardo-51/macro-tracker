@@ -42,7 +42,7 @@ Log entries, foods, and meal templates are deleted instantly on a single small i
 
 ## MEDIUM
 
-### [ ] 4. OpenAI requests have no timeout
+### [x] 4. OpenAI requests have no timeout
 
 `src/services/openai.ts:23`
 

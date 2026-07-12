@@ -32,8 +32,12 @@ async function chatCompletion(messages: ChatMessage[], apiKey: string): Promise<
         response_format: { type: 'json_object' },
         messages,
       }),
+      signal: AbortSignal.timeout(60_000),
     })
   } catch (e: any) {
+    if (e.name === 'TimeoutError' || e.name === 'AbortError') {
+      throw new Error('The request timed out. Check your internet connection and try again.')
+    }
     throw new Error(`Network error: ${e.message}. Check your internet connection or try a different network.`)
   }
 
