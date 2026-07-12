@@ -103,7 +103,7 @@ There's genuinely testable pure logic here — `date.ts`, `aggregateByDate`, `co
 
 `RecommendPage.vue:143` — the model can return duplicate names → duplicate `:key` warning and glitchy re-render. Key by index or a generated id.
 
-### [ ] 15. Consecutive snackbars don't restart the timer
+### [x] 15. Consecutive snackbars don't restart the timer
 
 `src/stores/app.ts:11-15` — if a snackbar is already open, `showSnackbar` just swaps the text; the 3s timeout from the first message keeps ticking. Toggle `snackbar.value = false` then `true` on `nextTick`.
 

@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { nextTick, ref } from 'vue'
 
 export interface SnackbarAction {
   label: string
@@ -14,7 +14,13 @@ export const useAppStore = defineStore('app', () => {
   const darkMode = ref(localStorage.getItem('darkMode') === 'true')
   const openaiApiKey = ref(localStorage.getItem('openaiApiKey') ?? '')
 
-  function showSnackbar(text: string, color = 'success', action: SnackbarAction | null = null) {
+  async function showSnackbar(text: string, color = 'success', action: SnackbarAction | null = null) {
+    // Close and reopen so a message replacing a visible one gets a fresh
+    // timeout instead of inheriting the remainder of the previous timer.
+    if (snackbar.value) {
+      snackbar.value = false
+      await nextTick()
+    }
     snackbarText.value = text
     snackbarColor.value = color
     snackbarAction.value = action
