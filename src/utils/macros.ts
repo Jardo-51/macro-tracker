@@ -44,7 +44,7 @@ export function addMacros(a: Macros, b: Macros): Macros {
 }
 
 export function sumMacros(items: Macros[]): Macros {
-  return items.reduce(addMacros, emptyMacros())
+  return items.reduce((acc, item) => addMacros(acc, item), emptyMacros())
 }
 
 // Guards against a zero goal, which would otherwise render Infinity%/NaN%.
