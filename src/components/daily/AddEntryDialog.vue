@@ -190,10 +190,10 @@
   function onLabelScanned(imageDataUrl: string) {
     extract(imageDataUrl, (result) => {
       macros.value = result.macros
-      if (saveAsFood.value) {
-        if (result.servingSize !== undefined) servingSize.value = result.servingSize
-        if (result.servingUnit !== undefined) servingUnit.value = result.servingUnit
-      }
+      // Always keep the scanned serving info so it isn't lost when
+      // "Save as custom food" is ticked after scanning.
+      if (result.servingSize !== undefined) servingSize.value = result.servingSize
+      if (result.servingUnit !== undefined) servingUnit.value = result.servingUnit
     })
   }
 
