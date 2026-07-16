@@ -75,7 +75,7 @@
     { key: 'fat', label: 'Fat', color: MACRO_COLORS.fat },
   ]
 
-  const colorMap: Record<string, string> = MACRO_COLORS
+  const colorMap: Readonly<Record<string, string>> = MACRO_COLORS
 
   const goalMap = computed(() => ({
     calories: dailyLogStore.goals.calories,
