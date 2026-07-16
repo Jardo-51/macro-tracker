@@ -18,14 +18,21 @@ export const useAppStore = defineStore('app', () => {
   // earlier one is suspended at `await nextTick()`, the stale continuation
   // bails instead of overwriting the newer message.
   let snackbarToken = 0
+  // True from the moment `snackbar` is set to false until the flush that lets
+  // Vuetify observe the close. A call arriving in that window must await the
+  // flush too, otherwise the ref goes true -> false -> true within one tick,
+  // the watcher never sees a change, and the timeout is not restarted.
+  let snackbarClosing = false
 
   async function showSnackbar(text: string, color = 'success', action: SnackbarAction | null = null) {
     const token = ++snackbarToken
     // Close and reopen so a message replacing a visible one gets a fresh
     // timeout instead of inheriting the remainder of the previous timer.
-    if (snackbar.value) {
+    if (snackbar.value || snackbarClosing) {
       snackbar.value = false
+      snackbarClosing = true
       await nextTick()
+      snackbarClosing = false
       if (token !== snackbarToken) return
     }
     snackbarText.value = text
