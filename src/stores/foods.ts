@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import { ref, computed, toRaw } from 'vue'
 import { db } from '@/db'
 import type { FoodItem, MealTemplate } from '@/types'
 import { uuidv7 } from 'uuidv7'
@@ -76,9 +76,11 @@ export const useFoodsStore = defineStore('foods', () => {
   }
 
   // Re-inserts a previously deleted item as-is (id and createdAt preserved),
-  // used by the delete-undo snackbar.
+  // used by the delete-undo snackbar. Callers pass the item straight from a
+  // v-for, i.e. a reactive proxy — unwrap it, since IndexedDB's structured
+  // clone rejects proxies with DataCloneError.
   async function restoreFoodItem(item: FoodItem) {
-    await db.foodItems.add(item)
+    await db.foodItems.add(toRaw(item))
     await loadFoodItems()
   }
 
@@ -104,7 +106,7 @@ export const useFoodsStore = defineStore('foods', () => {
   }
 
   async function restoreMealTemplate(template: MealTemplate) {
-    await db.mealTemplates.add(template)
+    await db.mealTemplates.add(toRaw(template))
     await loadMealTemplates()
   }
 

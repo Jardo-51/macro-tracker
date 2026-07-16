@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import { ref, computed, toRaw } from 'vue'
 import { db } from '@/db'
 import { seedDefaults } from '@/db/seed'
 import type { DailyGoals, DailyLogEntry, Macros } from '@/types'
@@ -91,9 +91,11 @@ export const useDailyLogStore = defineStore('dailyLog', () => {
   }
 
   // Re-inserts a previously deleted entry as-is (id and createdAt preserved),
-  // used by the delete-undo snackbar.
+  // used by the delete-undo snackbar. Callers pass the entry straight from a
+  // v-for, i.e. a reactive proxy — unwrap it, since IndexedDB's structured
+  // clone rejects proxies with DataCloneError.
   async function restoreEntry(entry: DailyLogEntry) {
-    await db.dailyLogEntries.add(entry)
+    await db.dailyLogEntries.add(toRaw(entry))
     if (entry.date === currentDate.value) await loadDate()
   }
 
