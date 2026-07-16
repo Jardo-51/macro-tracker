@@ -7,6 +7,10 @@ export default defineConfig({
   test: {
     environment: 'node',
     include: ['src/**/__tests__/*.test.ts'],
+    // Pin a non-UTC zone: date.test.ts distinguishes local-date from UTC-date
+    // implementations, which is only observable at a nonzero UTC offset.
+    // CI runners default to UTC, where the two are indistinguishable.
+    env: { TZ: 'America/New_York' },
   },
   resolve: {
     alias: {
