@@ -7,7 +7,7 @@
     <v-snackbar
       v-model="app.snackbar"
       :color="app.snackbarColor"
-      :timeout="3000"
+      :timeout="app.snackbarAction ? 6000 : 3000"
     >
       {{ app.snackbarText }}
       <template v-if="app.snackbarAction" #actions>
