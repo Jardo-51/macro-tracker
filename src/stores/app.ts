@@ -1,12 +1,17 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
+import { initAuth, isLoggedIn, login, logout, userName } from '@/services/auth'
 
 export const useAppStore = defineStore('app', () => {
   const snackbar = ref(false)
   const snackbarText = ref('')
   const snackbarColor = ref('success')
   const darkMode = ref(localStorage.getItem('darkMode') === 'true')
-  const openaiApiKey = ref(localStorage.getItem('openaiApiKey') ?? '')
+
+  // AI features are gated behind a Keycloak login (replaces the old API key).
+  const aiLoggedIn = computed(() => isLoggedIn.value)
+  const aiUserName = computed(() => userName.value)
+  void initAuth()
 
   function showSnackbar(text: string, color = 'success') {
     snackbarText.value = text
@@ -19,14 +24,13 @@ export const useAppStore = defineStore('app', () => {
     localStorage.setItem('darkMode', String(darkMode.value))
   }
 
-  function setOpenaiApiKey(key: string) {
-    openaiApiKey.value = key
-    localStorage.setItem('openaiApiKey', key)
+  function loginForAi() {
+    return login()
   }
 
-  function clearOpenaiApiKey() {
-    openaiApiKey.value = ''
-    localStorage.removeItem('openaiApiKey')
+  async function logoutFromAi() {
+    await logout()
+    showSnackbar('Logged out')
   }
 
   return {
@@ -34,10 +38,11 @@ export const useAppStore = defineStore('app', () => {
     snackbarText,
     snackbarColor,
     darkMode,
-    openaiApiKey,
+    aiLoggedIn,
+    aiUserName,
     showSnackbar,
     toggleDarkMode,
-    setOpenaiApiKey,
-    clearOpenaiApiKey,
+    loginForAi,
+    logoutFromAi,
   }
 })

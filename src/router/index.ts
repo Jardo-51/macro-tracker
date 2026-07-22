@@ -27,6 +27,10 @@ const router = createRouter({
       path: '/settings',
       component: () => import('@/pages/SettingsPage.vue'),
     },
+    {
+      path: '/auth/callback',
+      component: () => import('@/pages/AuthCallbackPage.vue'),
+    },
   ],
 })
 

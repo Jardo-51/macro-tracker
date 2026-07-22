@@ -1,6 +1,6 @@
 import { ref } from 'vue'
 import { useAppStore } from '@/stores/app'
-import { estimateMacros } from '@/services/openai'
+import { estimateMacros } from '@/services/aiProvider'
 import type { Macros } from '@/types'
 
 export function useEstimateMacros() {
@@ -10,7 +10,7 @@ export function useEstimateMacros() {
   async function estimate(name: string, onSuccess: (macros: Macros) => void) {
     estimating.value = true
     try {
-      const macros = await estimateMacros(name, appStore.openaiApiKey)
+      const macros = await estimateMacros(name)
       onSuccess(macros)
     } catch (e: any) {
       appStore.showSnackbar(e.message || 'Estimation failed', 'error')

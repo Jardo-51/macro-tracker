@@ -17,6 +17,7 @@
     "@mdi/font": "7.4.47",
     "chart.js": "^4.5.1",
     "dexie": "^4.3.0",
+    "oidc-client-ts": "^3.5.0",
     "pinia": "^3.0.4",
     "uuidv7": "^1.1.0",
     "vite-plugin-pwa": "^1.2.0",

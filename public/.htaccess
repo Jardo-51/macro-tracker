@@ -8,7 +8,7 @@
     Header set Expires "0"
 </Files>
 
-Header set Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self'; connect-src 'self' https://api.openai.com; manifest-src 'self'; worker-src 'self'; frame-ancestors 'none'; base-uri 'self';"
+Header set Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self'; connect-src 'self' https://ai.kalkules.com https://im.kalkules.com; manifest-src 'self'; worker-src 'self'; frame-ancestors 'none'; base-uri 'self';"
 Header set X-Content-Type-Options "nosniff"
 Header set X-Frame-Options "DENY"
 
