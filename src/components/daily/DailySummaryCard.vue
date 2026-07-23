@@ -12,17 +12,13 @@
         style="cursor: pointer; padding: 4px; margin: -4px"
         @click="openBreakdown(macro)"
       >
-        <div class="d-flex justify-space-between text-body-2 mb-1">
-          <span>{{ macro.label }}</span>
-          <span>
-            {{ store.dailyTotals[macro.key] }}{{ macro.unit }} / {{ store.goals[macro.key] }}{{ macro.unit }} ({{ store.progressPercentages[macro.key] }}%)
-          </span>
-        </div>
-        <v-progress-linear
-          :model-value="Math.min(100, store.progressPercentages[macro.key])"
+        <MacroProgressRow
+          :label="macro.label"
+          :value="store.dailyTotals[macro.key]"
+          :goal="store.goals[macro.key]"
+          :unit="macro.unit"
           :color="macro.color"
-          height="12"
-          rounded
+          :percent="store.progressPercentages[macro.key]"
         />
       </div>
     </v-card-text>
@@ -39,21 +35,18 @@
 <script lang="ts" setup>
   import { ref } from 'vue'
   import { useDailyLogStore } from '@/stores/dailyLog'
+  import { macroDisplays, type MacroDisplay } from '@/utils/macroDisplay'
   import MacroBreakdownDialog from './MacroBreakdownDialog.vue'
+  import MacroProgressRow from './MacroProgressRow.vue'
 
   const store = useDailyLogStore()
 
-  const macros = [
-    { key: 'calories' as const, label: 'Calories', unit: ' kcal', color: 'macro-calories' },
-    { key: 'protein' as const, label: 'Protein', unit: 'g', color: 'macro-protein' },
-    { key: 'carbsTotal' as const, label: 'Carbs', unit: 'g', color: 'macro-carbs' },
-    { key: 'fat' as const, label: 'Fat', unit: 'g', color: 'macro-fat' },
-  ]
+  const macros = macroDisplays
 
   const breakdownDialog = ref(false)
   const selectedMacro = ref(macros[0]!)
 
-  function openBreakdown(macro: typeof macros[number]) {
+  function openBreakdown(macro: MacroDisplay) {
     selectedMacro.value = macro
     breakdownDialog.value = true
   }
