@@ -57,7 +57,9 @@
 
   function open(entry: DailyLogEntry) {
     entryName.value = entry.name
-    entryMacros.value = entry.macros
+    // Snapshot the macros so the dialog stays read-only against later
+    // mutations of the store's reactive entry object.
+    entryMacros.value = { ...entry.macros }
     dialog.value = true
   }
 
