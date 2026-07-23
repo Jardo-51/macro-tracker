@@ -210,22 +210,26 @@
     try {
       const text = await file.text()
       const validated = validateImport(JSON.parse(text))
-      if (validated.foodItems) {
-        await db.foodItems.clear()
-        await db.foodItems.bulkAdd(validated.foodItems)
-      }
-      if (validated.mealTemplates) {
-        await db.mealTemplates.clear()
-        await db.mealTemplates.bulkAdd(validated.mealTemplates)
-      }
-      if (validated.dailyLogEntries) {
-        await db.dailyLogEntries.clear()
-        await db.dailyLogEntries.bulkAdd(validated.dailyLogEntries)
-      }
-      if (validated.dailyGoals) {
-        await db.dailyGoals.clear()
-        await db.dailyGoals.bulkAdd(validated.dailyGoals)
-      }
+      // Single transaction so a failure (duplicate id, quota...) rolls
+      // everything back instead of leaving the tables half-replaced.
+      await db.transaction('rw', db.foodItems, db.mealTemplates, db.dailyLogEntries, db.dailyGoals, async () => {
+        if (validated.foodItems) {
+          await db.foodItems.clear()
+          await db.foodItems.bulkAdd(validated.foodItems)
+        }
+        if (validated.mealTemplates) {
+          await db.mealTemplates.clear()
+          await db.mealTemplates.bulkAdd(validated.mealTemplates)
+        }
+        if (validated.dailyLogEntries) {
+          await db.dailyLogEntries.clear()
+          await db.dailyLogEntries.bulkAdd(validated.dailyLogEntries)
+        }
+        if (validated.dailyGoals) {
+          await db.dailyGoals.clear()
+          await db.dailyGoals.bulkAdd(validated.dailyGoals)
+        }
+      })
       await dailyLog.loadGoals()
       await dailyLog.loadDate()
       app.showSnackbar('Data imported successfully')
@@ -237,11 +241,13 @@
   }
 
   async function clearAll() {
-    await db.foodItems.clear()
-    await db.mealTemplates.clear()
-    await db.dailyLogEntries.clear()
-    await db.dailyGoals.clear()
-    await seedDefaults()
+    await db.transaction('rw', db.foodItems, db.mealTemplates, db.dailyLogEntries, db.dailyGoals, async () => {
+      await db.foodItems.clear()
+      await db.mealTemplates.clear()
+      await db.dailyLogEntries.clear()
+      await db.dailyGoals.clear()
+      await seedDefaults()
+    })
     await dailyLog.loadGoals()
     await dailyLog.loadDate()
     confirmClear.value = false

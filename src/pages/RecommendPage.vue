@@ -140,7 +140,7 @@
 
     <template v-if="snacks.length > 0">
       <h2 class="text-subtitle-1 font-weight-bold mb-3">Suggested Snacks</h2>
-      <v-card v-for="snack in snacks" :key="snack.name" class="mb-4">
+      <v-card v-for="(snack, i) in snacks" :key="i" class="mb-4">
         <v-card-title class="text-body-1">{{ snack.name }}</v-card-title>
         <v-card-text>
           <div class="d-flex flex-wrap ga-2 mb-2">
@@ -167,7 +167,6 @@
   import { useDailyLogStore } from '@/stores/dailyLog'
   import { useAppStore } from '@/stores/app'
   import { recommendFromMenu, suggestSnacks } from '@/services/openai'
-  import { today } from '@/utils/date'
   import { emptyMacros } from '@/types'
   import type { MenuRecommendation, RecommendedItem, SnackSuggestion } from '@/types'
 
@@ -181,11 +180,7 @@
   const recommendation = ref<MenuRecommendation | null>(null)
   const snacks = ref<SnackSuggestion[]>([])
 
-  onMounted(async () => {
-    await dailyLog.loadGoals()
-    const dateToLoad = dailyLog.currentDate < today() ? today() : undefined
-    await dailyLog.loadDate(dateToLoad)
-  })
+  onMounted(() => dailyLog.ensureFreshToday())
 
   async function getRecommendation() {
     loading.value = true

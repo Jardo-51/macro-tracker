@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import { ref, computed, toRaw } from 'vue'
 import { db } from '@/db'
 import type { FoodItem, MealTemplate } from '@/types'
 import { uuidv7 } from 'uuidv7'
@@ -19,7 +19,7 @@ function compareByRecency(
   return b.createdAt.localeCompare(a.createdAt)
 }
 
-function filterByName<T extends FoodItem | MealTemplate>(
+export function filterByName<T extends FoodItem | MealTemplate>(
   items: T[],
   query: string,
 ): T[] {
@@ -75,6 +75,15 @@ export const useFoodsStore = defineStore('foods', () => {
     foodItems.value = foodItems.value.filter(f => f.id !== id)
   }
 
+  // Re-inserts a previously deleted item as-is (id and createdAt preserved),
+  // used by the delete-undo snackbar. Callers pass the item straight from a
+  // v-for, i.e. a reactive proxy — unwrap it, since IndexedDB's structured
+  // clone rejects proxies with DataCloneError.
+  async function restoreFoodItem(item: FoodItem) {
+    await db.foodItems.add(toRaw(item))
+    await loadFoodItems()
+  }
+
   async function addMealTemplate(template: Omit<MealTemplate, 'id' | 'createdAt'>) {
     const newTemplate: MealTemplate = {
       ...template,
@@ -96,6 +105,11 @@ export const useFoodsStore = defineStore('foods', () => {
     mealTemplates.value = mealTemplates.value.filter(m => m.id !== id)
   }
 
+  async function restoreMealTemplate(template: MealTemplate) {
+    await db.mealTemplates.add(toRaw(template))
+    await loadMealTemplates()
+  }
+
   return {
     foodItems,
     mealTemplates,
@@ -110,9 +124,10 @@ export const useFoodsStore = defineStore('foods', () => {
     addFoodItem,
     updateFoodItem,
     deleteFoodItem,
+    restoreFoodItem,
     addMealTemplate,
     updateMealTemplate,
     deleteMealTemplate,
-    filterByName,
+    restoreMealTemplate,
   }
 })

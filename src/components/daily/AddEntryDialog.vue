@@ -1,6 +1,7 @@
 <template>
   <v-fab
     icon="mdi-plus"
+    aria-label="Add entry"
     color="primary"
     location="bottom end"
     style="position: fixed; bottom: 64px; right: 16px"
@@ -173,12 +174,13 @@
   import AiEstimateButton from './AiEstimateButton.vue'
   import ScanLabelButton from './ScanLabelButton.vue'
   import { useDailyLogStore } from '@/stores/dailyLog'
-  import { useFoodsStore } from '@/stores/foods'
+  import { filterByName, useFoodsStore } from '@/stores/foods'
   import { useAppStore } from '@/stores/app'
   import { useEstimateMacros } from '@/composables/useEstimateMacros'
   import { useExtractMacrosFromLabel } from '@/composables/useExtractMacrosFromLabel'
   import { emptyMacros } from '@/types'
   import type { FoodItem, MealTemplate } from '@/types'
+  import { multiplyMacros, sanitizeMacros, toFiniteNonNegative } from '@/utils/macros'
 
   const dailyLog = useDailyLogStore()
   const foodsStore = useFoodsStore()
@@ -189,10 +191,10 @@
   function onLabelScanned(imageDataUrl: string) {
     extract(imageDataUrl, (result) => {
       macros.value = result.macros
-      if (saveAsFood.value) {
-        if (result.servingSize !== undefined) servingSize.value = result.servingSize
-        if (result.servingUnit !== undefined) servingUnit.value = result.servingUnit
-      }
+      // Always keep the scanned serving info so it isn't lost when
+      // "Save as custom food" is ticked after scanning.
+      if (result.servingSize !== undefined) servingSize.value = result.servingSize
+      if (result.servingUnit !== undefined) servingUnit.value = result.servingUnit
     })
   }
 
@@ -206,7 +208,12 @@
   const multiplier = ref(1)
 
   function applyMultiplier() {
-    macros.value = multiplyMacros(macros.value, multiplier.value)
+    const factor = toFiniteNonNegative(multiplier.value)
+    if (factor <= 0) {
+      appStore.showSnackbar('Enter a multiplier greater than 0', 'error')
+      return
+    }
+    macros.value = multiplyMacros(sanitizeMacros(macros.value), factor)
     multiplier.value = 1
   }
 
@@ -220,11 +227,11 @@
   const selectedMeal = ref<MealTemplate | null>(null)
 
   const filteredFoods = computed(() =>
-    foodsStore.filterByName(foodsStore.recentFoodItems, foodSearch.value)
+    filterByName(foodsStore.recentFoodItems, foodSearch.value)
   )
 
   const filteredMeals = computed(() =>
-    foodsStore.filterByName(foodsStore.recentMealTemplates, mealSearch.value)
+    filterByName(foodsStore.recentMealTemplates, mealSearch.value)
   )
 
   const canSave = computed(() => {
@@ -249,41 +256,32 @@
     selectedMeal.value = meal
   }
 
-  function multiplyMacros(m: typeof macros.value, factor: number) {
-    return {
-      calories: Math.round(m.calories * factor),
-      protein: Math.round(m.protein * factor),
-      carbsTotal: Math.round(m.carbsTotal * factor),
-      carbsFiber: Math.round(m.carbsFiber * factor),
-      carbsSugar: Math.round(m.carbsSugar * factor),
-      fat: Math.round(m.fat * factor),
-    }
-  }
-
   async function save() {
     if (tab.value === 'manual') {
+      const cleanMacros = sanitizeMacros(macros.value)
       await dailyLog.addEntry({
         date: dailyLog.currentDate,
         name: name.value.trim(),
         servings: 1,
-        macros: { ...macros.value },
+        macros: cleanMacros,
         sourceType: 'manual',
       })
       if (saveAsFood.value) {
         await foodsStore.addFoodItem({
           name: name.value.trim(),
-          servingSize: servingSize.value,
+          servingSize: toFiniteNonNegative(servingSize.value),
           servingUnit: servingUnit.value,
-          macros: { ...macros.value },
+          macros: { ...cleanMacros },
         })
       }
     } else if (tab.value === 'foods' && selectedFood.value) {
       const food = selectedFood.value
+      const servings = toFiniteNonNegative(foodServings.value)
       await dailyLog.addEntry({
         date: dailyLog.currentDate,
         name: food.name,
-        servings: foodServings.value,
-        macros: multiplyMacros(food.macros, foodServings.value),
+        servings,
+        macros: multiplyMacros(food.macros, servings),
         sourceType: 'food',
         sourceId: food.id,
       })

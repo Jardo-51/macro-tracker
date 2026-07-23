@@ -1,7 +1,7 @@
 <template>
   <v-card>
     <v-card-title>Daily History</v-card-title>
-    <v-list v-if="store.rangeData.length > 0">
+    <template v-if="store.rangeData.length > 0">
       <v-expansion-panels variant="accordion">
         <v-expansion-panel
           v-for="day in reversedDays"
@@ -41,7 +41,10 @@
           </v-expansion-panel-text>
         </v-expansion-panel>
       </v-expansion-panels>
-    </v-list>
+    </template>
+    <v-card-text v-else class="text-center text-medium-emphasis">
+      No history yet.
+    </v-card-text>
   </v-card>
 </template>
 

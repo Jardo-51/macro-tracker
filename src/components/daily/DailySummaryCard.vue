@@ -15,7 +15,7 @@
         <div class="d-flex justify-space-between text-body-2 mb-1">
           <span>{{ macro.label }}</span>
           <span>
-            {{ store.dailyTotals[macro.key] }}{{ macro.unit }} / {{ store.goals[macro.key] }}{{ macro.unit }} ({{ Math.round(store.progressPercentages[macro.key]) }}%)
+            {{ store.dailyTotals[macro.key] }}{{ macro.unit }} / {{ store.goals[macro.key] }}{{ macro.unit }} ({{ store.progressPercentages[macro.key] }}%)
           </span>
         </div>
         <v-progress-linear

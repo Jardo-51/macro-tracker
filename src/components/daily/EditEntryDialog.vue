@@ -52,11 +52,14 @@
   import MacroInputFields from './MacroInputFields.vue'
   import AiEstimateButton from './AiEstimateButton.vue'
   import { useDailyLogStore } from '@/stores/dailyLog'
+  import { useAppStore } from '@/stores/app'
   import { useEstimateMacros } from '@/composables/useEstimateMacros'
   import { emptyMacros } from '@/types'
   import type { DailyLogEntry } from '@/types'
+  import { multiplyMacros, sanitizeMacros, toFiniteNonNegative } from '@/utils/macros'
 
   const dailyLog = useDailyLogStore()
+  const appStore = useAppStore()
   const { estimating, estimate } = useEstimateMacros()
 
   const dialog = ref(false)
@@ -76,22 +79,19 @@
   }
 
   function applyMultiplier() {
-    const f = multiplier.value
-    macros.value = {
-      calories: macros.value.calories * f,
-      protein: macros.value.protein * f,
-      carbsTotal: macros.value.carbsTotal * f,
-      carbsFiber: macros.value.carbsFiber * f,
-      carbsSugar: macros.value.carbsSugar * f,
-      fat: macros.value.fat * f,
+    const factor = toFiniteNonNegative(multiplier.value)
+    if (factor <= 0) {
+      appStore.showSnackbar('Enter a multiplier greater than 0', 'error')
+      return
     }
+    macros.value = multiplyMacros(sanitizeMacros(macros.value), factor)
     multiplier.value = 1
   }
 
   async function save() {
     await dailyLog.updateEntry(editingId.value, {
       name: name.value.trim(),
-      macros: { ...macros.value },
+      macros: sanitizeMacros(macros.value),
       servings: 1,
     })
     close()

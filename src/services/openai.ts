@@ -1,4 +1,5 @@
 import type { Macros, MenuRecommendation, SnackSuggestion } from '@/types'
+import { addMacros } from '@/utils/macros'
 
 type TextPart = { type: 'text'; text: string }
 type ImagePart = { type: 'image_url'; image_url: { url: string; detail?: 'low' | 'high' | 'auto' } }
@@ -31,8 +32,12 @@ async function chatCompletion(messages: ChatMessage[], apiKey: string): Promise<
         response_format: { type: 'json_object' },
         messages,
       }),
+      signal: AbortSignal.timeout(60_000),
     })
   } catch (e: any) {
+    if (e.name === 'TimeoutError' || e.name === 'AbortError') {
+      throw new Error('The request timed out. Check your internet connection and try again.')
+    }
     throw new Error(`Network error: ${e.message}. Check your internet connection or try a different network.`)
   }
 
@@ -52,10 +57,17 @@ async function chatCompletion(messages: ChatMessage[], apiKey: string): Promise<
     throw new Error('Unexpected response from OpenAI')
   }
 
-  return JSON.parse(content)
+  try {
+    return JSON.parse(content)
+  } catch {
+    throw new Error('AI returned an unexpected response. Please try again.')
+  }
 }
 
 function validateMacros(obj: any, label: string): void {
+  if (!obj || typeof obj !== 'object') {
+    throw new Error(`Invalid response: missing "macros" in ${label}`)
+  }
   for (const field of MACRO_FIELDS) {
     if (typeof obj[field] !== 'number') {
       throw new Error(`Invalid response: missing or non-numeric "${field}" in ${label}`)
@@ -144,14 +156,9 @@ export async function recommendFromMenu(
     macros: roundMacros(parsed.mainCourse.macros),
   }
 
-  const combinedMacros: Macros = {
-    calories: mainCourse.macros.calories + (soup?.macros.calories ?? 0),
-    protein: mainCourse.macros.protein + (soup?.macros.protein ?? 0),
-    carbsTotal: mainCourse.macros.carbsTotal + (soup?.macros.carbsTotal ?? 0),
-    carbsFiber: mainCourse.macros.carbsFiber + (soup?.macros.carbsFiber ?? 0),
-    carbsSugar: mainCourse.macros.carbsSugar + (soup?.macros.carbsSugar ?? 0),
-    fat: mainCourse.macros.fat + (soup?.macros.fat ?? 0),
-  }
+  const combinedMacros: Macros = soup
+    ? addMacros(mainCourse.macros, soup.macros)
+    : { ...mainCourse.macros }
 
   return {
     soup,

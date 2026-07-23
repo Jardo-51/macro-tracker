@@ -76,11 +76,14 @@
   import MacroInputFields from '@/components/daily/MacroInputFields.vue'
   import ScanLabelButton from '@/components/daily/ScanLabelButton.vue'
   import { useFoodsStore } from '@/stores/foods'
+  import { useAppStore } from '@/stores/app'
   import { useExtractMacrosFromLabel } from '@/composables/useExtractMacrosFromLabel'
   import { emptyMacros } from '@/types'
   import type { FoodItem } from '@/types'
+  import { multiplyMacros, sanitizeMacros, toFiniteNonNegative } from '@/utils/macros'
 
   const store = useFoodsStore()
+  const appStore = useAppStore()
   const { extracting, extract } = useExtractMacrosFromLabel()
 
   function onLabelScanned(imageDataUrl: string) {
@@ -102,16 +105,13 @@
   const multiplier = ref(1)
 
   function applyMultiplier() {
-    const m = form.macros
-    form.macros = {
-      calories: Math.round(m.calories * multiplier.value),
-      protein: Math.round(m.protein * multiplier.value),
-      carbsTotal: Math.round(m.carbsTotal * multiplier.value),
-      carbsFiber: Math.round(m.carbsFiber * multiplier.value),
-      carbsSugar: Math.round(m.carbsSugar * multiplier.value),
-      fat: Math.round(m.fat * multiplier.value),
+    const factor = toFiniteNonNegative(multiplier.value)
+    if (factor <= 0) {
+      appStore.showSnackbar('Enter a multiplier greater than 0', 'error')
+      return
     }
-    form.servingSize = Math.round(form.servingSize * multiplier.value)
+    form.macros = multiplyMacros(sanitizeMacros(form.macros), factor)
+    form.servingSize = Math.round(toFiniteNonNegative(form.servingSize) * factor)
     multiplier.value = 1
   }
 
@@ -146,17 +146,17 @@
       await store.updateFoodItem({
         id: editId.value,
         name: form.name.trim(),
-        servingSize: form.servingSize,
+        servingSize: toFiniteNonNegative(form.servingSize),
         servingUnit: form.servingUnit,
-        macros: { ...form.macros },
+        macros: sanitizeMacros(form.macros),
         createdAt: editCreatedAt.value,
       })
     } else {
       await store.addFoodItem({
         name: form.name.trim(),
-        servingSize: form.servingSize,
+        servingSize: toFiniteNonNegative(form.servingSize),
         servingUnit: form.servingUnit,
-        macros: { ...form.macros },
+        macros: sanitizeMacros(form.macros),
       })
     }
     emit('saved')

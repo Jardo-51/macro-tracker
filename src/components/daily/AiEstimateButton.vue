@@ -2,6 +2,7 @@
   <v-btn
     v-if="appStore.openaiApiKey"
     icon
+    aria-label="Estimate macros with AI"
     size="small"
     variant="tonal"
     color="primary"

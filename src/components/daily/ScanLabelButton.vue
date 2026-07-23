@@ -2,6 +2,7 @@
   <template v-if="appStore.openaiApiKey">
     <v-btn
       icon
+      aria-label="Scan nutrition label"
       size="small"
       variant="tonal"
       color="primary"

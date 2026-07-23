@@ -60,6 +60,7 @@
   import { reactive, watch } from 'vue'
   import { useDailyLogStore } from '@/stores/dailyLog'
   import { useAppStore } from '@/stores/app'
+  import { toFiniteNonNegative } from '@/utils/macros'
 
   const store = useDailyLogStore()
   const app = useAppStore()
@@ -79,7 +80,12 @@
   })
 
   async function save() {
-    await store.updateGoals(form)
+    await store.updateGoals({
+      calories: toFiniteNonNegative(form.calories),
+      protein: toFiniteNonNegative(form.protein),
+      carbsTotal: toFiniteNonNegative(form.carbsTotal),
+      fat: toFiniteNonNegative(form.fat),
+    })
     app.showSnackbar('Goals updated')
   }
 </script>

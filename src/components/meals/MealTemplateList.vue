@@ -23,8 +23,8 @@
         &middot; F {{ meal.macros.fat }}g
       </v-list-item-subtitle>
       <template #append>
-        <v-btn icon="mdi-pencil-outline" variant="text" size="small" @click="emit('edit', meal)" />
-        <v-btn icon="mdi-delete-outline" variant="text" size="small" @click="deleteMeal(meal.id)" />
+        <v-btn icon="mdi-pencil-outline" aria-label="Edit meal" variant="text" size="small" @click="emit('edit', meal)" />
+        <v-btn icon="mdi-delete-outline" aria-label="Delete meal" variant="text" size="small" @click="deleteMeal(meal)" />
       </template>
     </v-list-item>
   </v-list>
@@ -35,12 +35,18 @@
 
 <script lang="ts" setup>
   import { useFoodsStore } from '@/stores/foods'
+  import { useAppStore } from '@/stores/app'
   import type { MealTemplate } from '@/types'
 
   const store = useFoodsStore()
+  const app = useAppStore()
   const emit = defineEmits<{ edit: [item: MealTemplate] }>()
 
-  async function deleteMeal(id: string) {
-    await store.deleteMealTemplate(id)
+  async function deleteMeal(meal: MealTemplate) {
+    await store.deleteMealTemplate(meal.id)
+    app.showSnackbar(`Deleted "${meal.name}"`, 'success', {
+      label: 'Undo',
+      handler: () => store.restoreMealTemplate(meal).catch(() => app.showSnackbar('Failed to restore meal', 'error')),
+    })
   }
 </script>

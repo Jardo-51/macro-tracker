@@ -1,11 +1,11 @@
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import { ref, computed, toRaw } from 'vue'
 import { db } from '@/db'
 import { seedDefaults } from '@/db/seed'
-import { emptyMacros } from '@/types'
 import type { DailyGoals, DailyLogEntry, Macros } from '@/types'
 import { uuidv7 } from 'uuidv7'
 import { today } from '@/utils/date'
+import { percentOfGoal, sumMacros } from '@/utils/macros'
 
 export const useDailyLogStore = defineStore('dailyLog', () => {
   const currentDate = ref(today())
@@ -19,18 +19,7 @@ export const useDailyLogStore = defineStore('dailyLog', () => {
   })
   const isLoading = ref(false)
 
-  const dailyTotals = computed<Macros>(() => {
-    const totals = emptyMacros()
-    for (const entry of entries.value) {
-      totals.calories += entry.macros.calories
-      totals.protein += entry.macros.protein
-      totals.carbsTotal += entry.macros.carbsTotal
-      totals.carbsFiber += entry.macros.carbsFiber
-      totals.carbsSugar += entry.macros.carbsSugar
-      totals.fat += entry.macros.fat
-    }
-    return totals
-  })
+  const dailyTotals = computed<Macros>(() => sumMacros(entries.value.map(e => e.macros)))
 
   const remainingMacros = computed(() => ({
     calories: goals.value.calories - dailyTotals.value.calories,
@@ -40,10 +29,10 @@ export const useDailyLogStore = defineStore('dailyLog', () => {
   }))
 
   const progressPercentages = computed(() => ({
-    calories: Math.round((dailyTotals.value.calories / goals.value.calories) * 100),
-    protein: Math.round((dailyTotals.value.protein / goals.value.protein) * 100),
-    carbsTotal: Math.round((dailyTotals.value.carbsTotal / goals.value.carbsTotal) * 100),
-    fat: Math.round((dailyTotals.value.fat / goals.value.fat) * 100),
+    calories: percentOfGoal(dailyTotals.value.calories, goals.value.calories),
+    protein: percentOfGoal(dailyTotals.value.protein, goals.value.protein),
+    carbsTotal: percentOfGoal(dailyTotals.value.carbsTotal, goals.value.carbsTotal),
+    fat: percentOfGoal(dailyTotals.value.fat, goals.value.fat),
   }))
 
   async function loadGoals() {
@@ -56,6 +45,14 @@ export const useDailyLogStore = defineStore('dailyLog', () => {
     const updated = { ...newGoals, id: 'default' }
     await db.dailyGoals.put(updated)
     goals.value = updated
+  }
+
+  // Page bootstrap: load goals and the current day's entries, snapping back
+  // to today if the store still points at a stale (past) date from an
+  // earlier session.
+  async function ensureFreshToday() {
+    await loadGoals()
+    await loadDate(currentDate.value < today() ? today() : undefined)
   }
 
   async function loadDate(date?: string) {
@@ -93,6 +90,15 @@ export const useDailyLogStore = defineStore('dailyLog', () => {
     entries.value = entries.value.filter(e => e.id !== id)
   }
 
+  // Re-inserts a previously deleted entry as-is (id and createdAt preserved),
+  // used by the delete-undo snackbar. Callers pass the entry straight from a
+  // v-for, i.e. a reactive proxy — unwrap it, since IndexedDB's structured
+  // clone rejects proxies with DataCloneError.
+  async function restoreEntry(entry: DailyLogEntry) {
+    await db.dailyLogEntries.add(toRaw(entry))
+    if (entry.date === currentDate.value) await loadDate()
+  }
+
   async function updateEntry(id: string, changes: Pick<DailyLogEntry, 'name' | 'macros' | 'servings'>) {
     const existing = entries.value.find(e => e.id === id)
     if (!existing) return
@@ -112,9 +118,11 @@ export const useDailyLogStore = defineStore('dailyLog', () => {
     progressPercentages,
     loadGoals,
     updateGoals,
+    ensureFreshToday,
     loadDate,
     addEntry,
     removeEntry,
+    restoreEntry,
     updateEntry,
   }
 })
