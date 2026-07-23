@@ -39,21 +39,17 @@
 <script lang="ts" setup>
   import { ref } from 'vue'
   import { useDailyLogStore } from '@/stores/dailyLog'
+  import { macroDisplays, type MacroDisplay } from '@/utils/macroDisplay'
   import MacroBreakdownDialog from './MacroBreakdownDialog.vue'
 
   const store = useDailyLogStore()
 
-  const macros = [
-    { key: 'calories' as const, label: 'Calories', unit: ' kcal', color: 'macro-calories' },
-    { key: 'protein' as const, label: 'Protein', unit: 'g', color: 'macro-protein' },
-    { key: 'carbsTotal' as const, label: 'Carbs', unit: 'g', color: 'macro-carbs' },
-    { key: 'fat' as const, label: 'Fat', unit: 'g', color: 'macro-fat' },
-  ]
+  const macros = macroDisplays
 
   const breakdownDialog = ref(false)
   const selectedMacro = ref(macros[0]!)
 
-  function openBreakdown(macro: typeof macros[number]) {
+  function openBreakdown(macro: MacroDisplay) {
     selectedMacro.value = macro
     breakdownDialog.value = true
   }

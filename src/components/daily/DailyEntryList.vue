@@ -5,6 +5,7 @@
       <v-list-item
         v-for="entry in store.entries"
         :key="entry.id"
+        @click="contributionDialog?.open(entry)"
       >
         <template #prepend>
           <v-icon :color="sourceColor(entry.sourceType)">
@@ -25,14 +26,14 @@
             aria-label="Edit entry"
             variant="text"
             size="small"
-            @click="editDialog?.open(entry)"
+            @click.stop="editDialog?.open(entry)"
           />
           <v-btn
             icon="mdi-delete-outline"
             aria-label="Delete entry"
             variant="text"
             size="small"
-            @click="removeEntry(entry)"
+            @click.stop="removeEntry(entry)"
           />
         </template>
       </v-list-item>
@@ -43,6 +44,7 @@
   </v-card>
 
   <EditEntryDialog ref="editDialog" />
+  <EntryContributionDialog ref="contributionDialog" />
 </template>
 
 <script lang="ts" setup>
@@ -51,10 +53,12 @@
   import { useAppStore } from '@/stores/app'
   import type { DailyLogEntry } from '@/types'
   import EditEntryDialog from './EditEntryDialog.vue'
+  import EntryContributionDialog from './EntryContributionDialog.vue'
 
   const store = useDailyLogStore()
   const app = useAppStore()
   const editDialog = ref<InstanceType<typeof EditEntryDialog> | null>(null)
+  const contributionDialog = ref<InstanceType<typeof EntryContributionDialog> | null>(null)
 
   function sourceIcon(type: string) {
     switch (type) {
