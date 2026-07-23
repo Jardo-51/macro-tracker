@@ -12,17 +12,13 @@
         style="cursor: pointer; padding: 4px; margin: -4px"
         @click="openBreakdown(macro)"
       >
-        <div class="d-flex justify-space-between text-body-2 mb-1">
-          <span>{{ macro.label }}</span>
-          <span>
-            {{ store.dailyTotals[macro.key] }}{{ macro.unit }} / {{ store.goals[macro.key] }}{{ macro.unit }} ({{ store.progressPercentages[macro.key] }}%)
-          </span>
-        </div>
-        <v-progress-linear
-          :model-value="Math.min(100, store.progressPercentages[macro.key])"
+        <MacroProgressRow
+          :label="macro.label"
+          :value="store.dailyTotals[macro.key]"
+          :goal="store.goals[macro.key]"
+          :unit="macro.unit"
           :color="macro.color"
-          height="12"
-          rounded
+          :percent="store.progressPercentages[macro.key]"
         />
       </div>
     </v-card-text>
@@ -41,6 +37,7 @@
   import { useDailyLogStore } from '@/stores/dailyLog'
   import { macroDisplays, type MacroDisplay } from '@/utils/macroDisplay'
   import MacroBreakdownDialog from './MacroBreakdownDialog.vue'
+  import MacroProgressRow from './MacroProgressRow.vue'
 
   const store = useDailyLogStore()
 

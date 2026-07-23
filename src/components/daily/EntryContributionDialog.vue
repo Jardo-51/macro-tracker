@@ -11,17 +11,13 @@
           :key="macro.key"
           class="mb-3"
         >
-          <div class="d-flex justify-space-between text-body-2 mb-1">
-            <span>{{ macro.label }}</span>
-            <span>
-              {{ entryMacros[macro.key] }}{{ macro.unit }} / {{ store.goals[macro.key] }}{{ macro.unit }} ({{ percentOfGoal(entryMacros[macro.key], store.goals[macro.key]) }}%)
-            </span>
-          </div>
-          <v-progress-linear
-            :model-value="Math.min(100, percentOfGoal(entryMacros[macro.key], store.goals[macro.key]))"
+          <MacroProgressRow
+            :label="macro.label"
+            :value="entryMacros[macro.key]"
+            :goal="store.goals[macro.key]"
+            :unit="macro.unit"
             :color="macro.color"
-            height="12"
-            rounded
+            :percent="entryPercentages[macro.key]"
           />
         </div>
       </v-card-text>
@@ -34,11 +30,12 @@
 </template>
 
 <script lang="ts" setup>
-  import { ref } from 'vue'
+  import { computed, ref } from 'vue'
+  import MacroProgressRow from './MacroProgressRow.vue'
   import { useDailyLogStore } from '@/stores/dailyLog'
   import { emptyMacros } from '@/types'
   import type { DailyLogEntry, Macros } from '@/types'
-  import { macroDisplays } from '@/utils/macroDisplay'
+  import { macroDisplays, type MacroDisplay } from '@/utils/macroDisplay'
   import { percentOfGoal } from '@/utils/macros'
 
   const store = useDailyLogStore()
@@ -48,6 +45,15 @@
   const dialog = ref(false)
   const entryName = ref('')
   const entryMacros = ref<Macros>(emptyMacros())
+
+  const entryPercentages = computed(() =>
+    Object.fromEntries(
+      macros.map(macro => [
+        macro.key,
+        percentOfGoal(entryMacros.value[macro.key], store.goals[macro.key]),
+      ]),
+    ) as Record<MacroDisplay['key'], number>,
+  )
 
   function open(entry: DailyLogEntry) {
     entryName.value = entry.name
