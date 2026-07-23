@@ -1,0 +1,14 @@
+/* Global Vuetify overrides that can't live in scoped component styles. */
+
+/*
+ * Dialogs tagged `dim-scrim` open directly over the "Daily Progress" bars,
+ * whose bright macro colors read through Vuetify's light default scrim
+ * (~0.32) as a distraction. Darken and blur the scrim so the background
+ * clearly recedes. The scrim is teleported outside the component, so this
+ * has to be global rather than a scoped style. The extra class keeps the
+ * override specific to these dialogs.
+ */
+.dim-scrim .v-overlay__scrim {
+  opacity: 0.75;
+  backdrop-filter: blur(2px);
+}

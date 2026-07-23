@@ -3,6 +3,7 @@
     :model-value="modelValue"
     max-width="500"
     scrollable
+    class="dim-scrim"
     @update:model-value="$emit('update:modelValue', $event)"
   >
     <v-card>

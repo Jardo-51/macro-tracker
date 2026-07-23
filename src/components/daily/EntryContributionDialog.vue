@@ -1,5 +1,5 @@
 <template>
-  <v-dialog v-model="dialog" max-width="500" scrollable class="contribution-dialog">
+  <v-dialog v-model="dialog" max-width="500" scrollable class="dim-scrim">
     <v-card>
       <v-card-title style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap">
         {{ entryName }}
@@ -65,16 +65,3 @@
 
   defineExpose({ open })
 </script>
-
-<!--
-  Non-scoped: the dialog's scrim is teleported outside this component, so it
-  can't be reached by scoped styles. The class lands on the .v-overlay root.
-  Darken the default (~0.32) scrim and blur it so the equally-bright "Daily
-  Progress" bars sitting directly behind recede while the dialog is open.
--->
-<style>
-.contribution-dialog .v-overlay__scrim {
-  opacity: 0.75;
-  backdrop-filter: blur(2px);
-}
-</style>
