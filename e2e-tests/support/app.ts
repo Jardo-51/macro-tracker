@@ -97,19 +97,39 @@ export async function expectSnackbar (page: Page, text: string) {
 }
 
 /**
- * `exact` on every nav match on purpose: Playwright matches an accessible name
+ * The nav destinations a helper below drives, and the route each one lands on.
+ *
+ * Only the two that are actually reached: a `Recommend`/`History`/`Meals` entry
+ * here with no `openX` helper behind it is a claim about what the specs cover
+ * that nothing checks, so add the pair together when a spec needs one.
+ */
+const navPaths = {
+  Daily: '/daily',
+  Settings: '/settings',
+} as const
+
+/**
+ * Goes to `to` unless the page is already there, so every caller gets the same
+ * rule rather than one helper per rule.
+ *
+ * The click is skipped rather than left to vue-router's duplicate-navigation
+ * no-op because it is not free: it can be swallowed by whatever is over the
+ * bottom nav, and a spec that only wants "be on this page" should not depend on
+ * the nav being reachable at that moment. {@link settle} still runs either way —
+ * a caller is about to interact with the page it asked for.
+ *
+ * `exact` on the nav match on purpose: Playwright matches an accessible name
  * as a case-insensitive *substring* by default, and the nav's own labels
  * already overlap what the pages put on screen.
  */
-async function navigate (page: Page, to: 'Daily' | 'Recommend' | 'History' | 'Meals' | 'Settings') {
+async function navigate (page: Page, to: keyof typeof navPaths) {
   await settle(page)
+  if (new URL(page.url()).pathname === navPaths[to]) return
   await page.getByRole('link', { name: to, exact: true }).click()
 }
 
 export async function openDaily (page: Page) {
-  if (new URL(page.url()).pathname !== '/daily') {
-    await navigate(page, 'Daily')
-  }
+  await navigate(page, 'Daily')
   await expect(dailyCard(page)).toBeVisible()
 }
 
