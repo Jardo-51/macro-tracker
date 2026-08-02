@@ -40,5 +40,7 @@ jobs:
           printf '%s\n' "$DEPLOY_HOST_KEY" >> ~/.ssh/known_hosts
 
       - name: Deploy via rsync
+        env:
+          DEPLOY_URL: ${{ secrets.DEPLOY_URL }}
         run: |
-          rsync -crvz --delete ./dist/ ${{ secrets.DEPLOY_URL }}
+          rsync -crvz --delete ./dist/ "$DEPLOY_URL"
