@@ -1,10 +1,11 @@
 name: Build app
 description: Install Nix + pnpm, restore the pnpm store cache, and build the app.
 
-# No lint step, unlike the template this came from: the eslint baseline in this
-# repo is not clean (hundreds of stylistic findings across `src/`), so gating on
-# `pnpm lint` would fail every build until that is dealt with as its own piece
-# of work. `pnpm build` runs `type-check`, which is what CI gates on here.
+# There is no lint step here on purpose: the eslint baseline is not clean
+# (~537 mostly stylistic findings across `src/`), so gating on `pnpm lint` would
+# fail every build. `pnpm build` runs `type-check`, which is what CI gates on.
+# Cleaning the baseline and adding the step back is tracked in
+# https://github.com/Jardo-51/macro-tracker/issues/18.
 
 runs:
   using: composite
