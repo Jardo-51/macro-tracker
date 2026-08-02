@@ -55,9 +55,14 @@ describe('App', () => {
     // takes a macrotask of its own, hence the loop rather than a single flush.
     await waitFor(() => wrapper!.text().includes('1234'))
 
-    // Both of these came back from the database rather than from the store's
-    // defaults: the seeded goal, and the entries query resolving to nothing.
+    // The seeded goal is the load-bearing one: `seedDefaults` writes 2000 when
+    // the row is missing, so 1234 on screen can only be a successful read.
     expect(wrapper.text()).toContain('1234')
+    // The empty state is not a second proof of that — `entries` starts as `[]`
+    // and `DailyEntryList` renders this off the initial value, so it would be
+    // here even if the query never resolved. It is asserted anyway because the
+    // page rendering *its own* empty state, rather than blank markup or an
+    // error boundary, is part of what "the shell mounts" means.
     expect(wrapper.text()).toContain('No entries yet')
   })
 })
