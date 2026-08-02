@@ -50,8 +50,13 @@ jobs:
       # `.github/actions/setup`, where caching the store cost more than it
       # saved — that is about the default shell, and it is the browser closure
       # here, far larger than `nodejs` + `pnpm`, that flips the tradeoff.
+      # Pinned to a commit SHA rather than the `v7` tag the other steps use:
+      # this is the one third-party action here, and a mutable tag on one is a
+      # supply-chain hole — whoever can move it can run code in a job that holds
+      # `actions: write` on this repo. Bump it deliberately by resolving the tag
+      # again.
       - name: Cache Nix store
-        uses: nix-community/cache-nix-action@v7
+        uses: nix-community/cache-nix-action@7df957e333c1e5da7721f60227dbba6d06080569 # v7.0.2
         with:
           primary-key: nix-playwright-${{ runner.os }}-${{ hashFiles('flake.nix', 'flake.lock') }}
           restore-prefixes-first-match: nix-playwright-${{ runner.os }}-

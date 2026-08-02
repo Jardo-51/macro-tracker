@@ -22,7 +22,7 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
-if [ ! -f node_modules/@playwright/test/package.json ]; then
+if [[ ! -f node_modules/@playwright/test/package.json ]]; then
   echo "@playwright/test is not installed — run 'pnpm install' first." >&2
   exit 1
 fi
@@ -60,7 +60,7 @@ if [[ ! $spec =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?(\+[0-9A-Za-z.-]+)?$ ]
   failed=true
 fi
 
-if [ "$installed" != "$driver" ]; then
+if [[ "$installed" != "$driver" ]]; then
   echo "@playwright/test and the nixpkgs browsers have drifted apart:" >&2
   echo "  @playwright/test (installed): $installed" >&2
   echo "  playwright-driver (flake.lock): $driver" >&2
@@ -74,7 +74,7 @@ if [ "$installed" != "$driver" ]; then
   failed=true
 fi
 
-if [ "$failed" = true ]; then
+if [[ "$failed" == true ]]; then
   exit 1
 fi
 
