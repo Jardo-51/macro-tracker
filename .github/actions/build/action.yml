@@ -1,0 +1,22 @@
+name: Build app
+description: Install Nix + pnpm, restore the pnpm store cache, and build the app.
+
+# No lint step, unlike the template this came from: the eslint baseline in this
+# repo is not clean (hundreds of stylistic findings across `src/`), so gating on
+# `pnpm lint` would fail every build until that is dealt with as its own piece
+# of work. `pnpm build` runs `type-check`, which is what CI gates on here.
+
+runs:
+  using: composite
+  steps:
+    - name: Set up toolchain
+      uses: ./.github/actions/setup
+
+    - name: Build
+      shell: bash
+      run: |
+        nix develop --command bash -c '
+          set -e
+          pnpm install --frozen-lockfile
+          pnpm build
+        '

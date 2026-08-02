@@ -3,8 +3,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { nextTick, watch } from 'vue'
 import { useAppStore } from '@/stores/app'
 
-// The store reads localStorage during setup; these tests run in the `node`
-// environment, so give it a minimal in-memory stand-in.
+// The store reads localStorage during setup. jsdom does provide one, but it is
+// shared by every test file in the run; a stand-in per test keeps a stored
+// theme from leaking in and deciding `darkMode` here.
 function createLocalStorageStub () {
   const store = new Map<string, string>()
   return {
