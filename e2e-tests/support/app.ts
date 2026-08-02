@@ -92,7 +92,7 @@ export async function settle (page: Page) {
 
 /** Waits for a snackbar carrying `text`, then waits it back out. */
 export async function expectSnackbar (page: Page, text: string) {
-  await expect(page.locator('.v-snackbar--active')).toContainText(text)
+  await expect(page.locator('.v-snackbar--active').first()).toContainText(text)
   await settle(page)
 }
 
