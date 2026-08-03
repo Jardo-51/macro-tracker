@@ -111,6 +111,35 @@ Alternatively, if you use [Nix](https://nixos.org/), you can run commands via th
 nix develop -c pnpm dev
 ```
 
+## Testing
+
+Two suites, split by what they need to run.
+
+**Unit tests** — Vitest, jsdom, no build. The stores, the date and macro helpers,
+and one smoke test that mounts the app shell. They live next to what they cover,
+in `src/**/__tests__/`, and are what to reach for first.
+
+```bash
+nix develop -c pnpm test          # run once
+nix develop -c pnpm test:watch    # re-run on change
+```
+
+**End-to-end tests** — Playwright, driving the production build in a real
+browser. These cover what only a browser can show: the service worker with the
+network cut, and data written and read back through IndexedDB. The browsers come
+from the `playwright` nix shell rather than `playwright install`, so CI and a dev
+machine drive the same binary.
+
+```bash
+nix develop .#playwright -c pnpm test:e2e
+```
+
+See [`e2e-tests/README.md`](e2e-tests/README.md) for the details — the shared
+preview port, the `@playwright/test` pin, and the conventions the specs follow.
+
+CI runs the unit tests on every push (`.github/workflows/build.yml`) and the e2e
+suite on pull requests and `main` (`.github/workflows/e2e-tests.yml`).
+
 ## Project Structure
 
 ```

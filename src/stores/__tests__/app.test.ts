@@ -3,8 +3,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { nextTick, watch } from 'vue'
 import { useAppStore } from '@/stores/app'
 
-// The store reads localStorage during setup; these tests run in the `node`
-// environment, so give it a minimal in-memory stand-in.
+// The store reads localStorage during setup. jsdom does provide one, and
+// Vitest's default `isolate: true` already gives this file its own — so this is
+// not about other files. It is about the tests *within* this file: one jsdom
+// storage is shared across all of them, so a stand-in installed per test keeps
+// anything the store itself wrote through `toggleDarkMode`/`setOpenaiApiKey`
+// from deciding `darkMode` in the next one.
 function createLocalStorageStub () {
   const store = new Map<string, string>()
   return {

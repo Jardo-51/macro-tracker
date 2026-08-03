@@ -56,12 +56,14 @@ describe('restoreEntry', () => {
     await store.addEntry(makeEntry(store))
     await store.loadDate()
 
-    const proxied = store.entries[0]
+    // Non-null: the addEntry + loadDate above are what put it there, and the
+    // length assertions below would fail first if they had not.
+    const proxied = store.entries[0]!
     await store.removeEntry(proxied.id)
     expect(store.entries).toHaveLength(0)
 
     await expect(store.restoreEntry(proxied)).resolves.toBeUndefined()
     expect(store.entries).toHaveLength(1)
-    expect(store.entries[0].name).toBe('Oatmeal')
+    expect(store.entries[0]?.name).toBe('Oatmeal')
   })
 })
