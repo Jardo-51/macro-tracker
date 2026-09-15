@@ -99,9 +99,9 @@ export async function expectSnackbar (page: Page, text: string) {
 /**
  * The nav destinations a helper below drives, and the route each one lands on.
  *
- * Only the two that are actually reached: a `Recommend`/`History`/`Meals` entry
- * here with no `openX` helper behind it is a claim about what the specs cover
- * that nothing checks, so add the pair together when a spec needs one.
+ * Only the three that are actually reached: a `Recommend`/`History` entry here
+ * with no `openX` helper behind it is a claim about what the specs cover that
+ * nothing checks, so add the pair together when a spec needs one.
  */
 const navPaths = {
   Daily: '/daily',
