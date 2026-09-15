@@ -9,6 +9,15 @@ import { openAddEntryDialog, openApp, openMeals } from './support/app'
  * Each test types something first so the assertion is about the input
  * surviving, which is what the user actually loses, not only about the dialog
  * staying on screen.
+ *
+ * The Edit variants of the food and meal dialogs are the same two components,
+ * so they get `persistent` from the same prop — arguably the more consequential
+ * half, since an edit holds data the user did not type this minute. They are
+ * not covered separately on purpose: the prop sits on the one `v-dialog` each
+ * component renders, and `isEdit` reaches only the title, the submit button's
+ * label and which store call runs — nothing on the path that dismisses the
+ * dialog. A second pair of tests would re-run these assertions against the
+ * same markup.
  */
 
 /**
