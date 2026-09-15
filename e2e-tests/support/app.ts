@@ -222,8 +222,9 @@ export async function openAddEntryDialog (page: Page) {
   // The FAB sits where the snackbar does, so anything up has to be gone first.
   await settle(page)
   await page.getByLabel('Add entry', { exact: true }).getByRole('button').click()
-  await expect(page.getByRole('dialog')).toBeVisible()
-  return page.getByRole('dialog')
+  const dialog = page.getByRole('dialog')
+  await expect(dialog).toBeVisible()
+  return dialog
 }
 
 /**
