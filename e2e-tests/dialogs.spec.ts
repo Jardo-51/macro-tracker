@@ -12,12 +12,18 @@ import { openAddEntryDialog, openApp, openMeals } from './support/app'
  */
 
 /**
- * Taps the scrim, well clear of the dialog. The top-left corner is outside it
- * at the phone viewport the suite runs in: the dialog is centred and has
- * margins on every side.
+ * Taps the scrim, well clear of the dialog — its top-left corner, which the
+ * centred dialog does not reach.
+ *
+ * Through the scrim's own locator rather than `page.mouse.click(5, 5)`:
+ * a raw coordinate skips every actionability check, so a dialog that grew over
+ * that corner would swallow the tap and leave the assertions below passing
+ * without testing anything. Playwright checks that the scrim is what actually
+ * receives the event at this point and fails with "intercepts pointer events"
+ * if it is not, which makes that a loud failure rather than a silent one.
  */
 async function tapOutside (page: Page) {
-  await page.mouse.click(5, 5)
+  await page.locator('.v-overlay__scrim').first().click({ position: { x: 5, y: 5 } })
 }
 
 async function expectStaysOpen (page: Page, dialog: Locator, field: Locator, value: string) {
