@@ -1,5 +1,5 @@
 <template>
-  <v-dialog v-model="dialog" max-width="500" scrollable>
+  <v-dialog v-model="dialog" max-width="500" scrollable persistent>
     <v-card>
       <v-card-title>{{ isEdit ? 'Edit Food' : 'New Food' }}</v-card-title>
       <v-card-text>
