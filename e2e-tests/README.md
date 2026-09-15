@@ -84,6 +84,9 @@ docblock — that is where it stays in step with the assertions. In outline:
   offline-first food log this is the one to keep green.
 - `settings.spec.ts` — the two kinds of persisted setting: the theme, which is a
   localStorage string, and the daily goals, which are a row in IndexedDB.
+- `dialogs.spec.ts` — the add dialogs staying open, and keeping what has been
+  typed, through the gestures that used to discard it: a tap on the scrim and an
+  Escape. Only a browser has a scrim to tap.
 
 Nothing here touches the OpenAI-backed features (estimate, label scan,
 recommend). They are network calls to a third party behind a key the suite does
