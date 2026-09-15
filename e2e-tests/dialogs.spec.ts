@@ -40,6 +40,11 @@ async function expectStaysOpen (page: Page, dialog: Locator, field: Locator, val
   await expect(dialog).toBeVisible()
   await expect(field).toHaveValue(value)
 
+  // Focused first so the key goes to the form rather than to whatever the tap
+  // above left focused: Escape from outside the overlay would be a no-op, and
+  // the assertions below cannot tell that apart from a dialog refusing to
+  // close. It is also where the user's cursor actually is.
+  await field.focus()
   await page.keyboard.press('Escape')
   await expect(dialog).toBeVisible()
   await expect(field).toHaveValue(value)
