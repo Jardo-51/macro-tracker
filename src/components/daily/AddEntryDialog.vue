@@ -8,7 +8,7 @@
     @click="dialog = true"
   />
 
-  <v-dialog v-model="dialog" max-width="500">
+  <v-dialog v-model="dialog" max-width="500" persistent>
     <v-card>
       <v-card-title>Add Entry</v-card-title>
       <v-tabs v-model="tab" grow>

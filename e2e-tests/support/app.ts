@@ -99,12 +99,13 @@ export async function expectSnackbar (page: Page, text: string) {
 /**
  * The nav destinations a helper below drives, and the route each one lands on.
  *
- * Only the two that are actually reached: a `Recommend`/`History`/`Meals` entry
- * here with no `openX` helper behind it is a claim about what the specs cover
- * that nothing checks, so add the pair together when a spec needs one.
+ * Only the three that are actually reached: a `Recommend`/`History` entry here
+ * with no `openX` helper behind it is a claim about what the specs cover that
+ * nothing checks, so add the pair together when a spec needs one.
  */
 const navPaths = {
   Daily: '/daily',
+  Meals: '/meals',
   Settings: '/settings',
 } as const
 
@@ -131,6 +132,11 @@ async function navigate (page: Page, to: keyof typeof navPaths) {
 export async function openDaily (page: Page) {
   await navigate(page, 'Daily')
   await expect(dailyCard(page)).toBeVisible()
+}
+
+export async function openMeals (page: Page) {
+  await navigate(page, 'Meals')
+  await expect(page.getByRole('heading', { name: 'My Foods & Meals', exact: true })).toBeVisible()
 }
 
 export async function openSettings (page: Page) {
@@ -202,6 +208,26 @@ export async function setCalorieGoal (page: Page, calories: number) {
 }
 
 /**
+ * Opens the Daily page's Add Entry dialog from the FAB.
+ *
+ * Through the label rather than `getByRole('button', { name: 'Add entry' })`:
+ * `AddEntryDialog`'s `aria-label` is an attribute, and Vuetify's `VFab` puts
+ * attributes on its wrapper `div` while the `VBtn` inside it takes only
+ * declared props. So the button itself has no accessible name — which is a
+ * real accessibility gap, not a quirk of this locator, and worth fixing in the
+ * component rather than here.
+ */
+export async function openAddEntryDialog (page: Page) {
+  await openDaily(page)
+  // The FAB sits where the snackbar does, so anything up has to be gone first.
+  await settle(page)
+  await page.getByLabel('Add entry', { exact: true }).getByRole('button').click()
+  const dialog = page.getByRole('dialog')
+  await expect(dialog).toBeVisible()
+  return dialog
+}
+
+/**
  * Logs a manual entry from the Daily page's Add Entry dialog.
  *
  * The dialog opens on *My Foods*, so the tab is switched explicitly rather than
@@ -209,18 +235,7 @@ export async function setCalorieGoal (page: Page, calories: number) {
  * missing "Food name" field rather than as what it is.
  */
 export async function addManualEntry (page: Page, name: string, calories: number) {
-  await openDaily(page)
-  // The FAB sits where the snackbar does, so anything up has to be gone first.
-  await settle(page)
-  // Through the label rather than `getByRole('button', { name: 'Add entry' })`:
-  // `AddEntryDialog`'s `aria-label` is an attribute, and Vuetify's `VFab` puts
-  // attributes on its wrapper `div` while the `VBtn` inside it takes only
-  // declared props. So the button itself has no accessible name — which is a
-  // real accessibility gap, not a quirk of this locator, and worth fixing in
-  // the component rather than here.
-  await page.getByLabel('Add entry', { exact: true }).getByRole('button').click()
-
-  const dialog = page.getByRole('dialog')
+  const dialog = await openAddEntryDialog(page)
   await dialog.getByRole('tab', { name: 'Manual' }).click()
   await dialog.getByLabel('Food name').fill(name)
   await dialog.getByLabel('Calories', { exact: true }).fill(String(calories))
