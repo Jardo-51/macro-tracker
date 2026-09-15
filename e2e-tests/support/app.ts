@@ -136,7 +136,7 @@ export async function openDaily (page: Page) {
 
 export async function openMeals (page: Page) {
   await navigate(page, 'Meals')
-  await expect(page.getByRole('heading', { name: 'My Foods & Meals' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'My Foods & Meals', exact: true })).toBeVisible()
 }
 
 export async function openSettings (page: Page) {

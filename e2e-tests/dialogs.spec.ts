@@ -49,7 +49,7 @@ async function expectStaysOpen (page: Page, dialog: Locator, field: Locator, val
   await expect(dialog).toBeVisible()
   await expect(field).toHaveValue(value)
 
-  await dialog.getByRole('button', { name: 'Cancel' }).click()
+  await dialog.getByRole('button', { name: 'Cancel', exact: true }).click()
   await expect(dialog).toBeHidden()
 }
 
@@ -57,7 +57,7 @@ test.describe('the add dialogs', () => {
   test('Add Entry closes only through Cancel', async ({ page }) => {
     await openApp(page)
     const dialog = await openAddEntryDialog(page)
-    await dialog.getByRole('tab', { name: 'Manual' }).click()
+    await dialog.getByRole('tab', { name: 'Manual', exact: true }).click()
     const name = dialog.getByLabel('Food name')
     await name.fill('Oatmeal')
 
@@ -67,7 +67,7 @@ test.describe('the add dialogs', () => {
   test('New Food closes only through Cancel', async ({ page }) => {
     await openApp(page)
     await openMeals(page)
-    await page.getByRole('button', { name: 'Add Food' }).click()
+    await page.getByRole('button', { name: 'Add Food', exact: true }).click()
     const dialog = page.getByRole('dialog')
     await expect(dialog).toContainText('New Food')
     const name = dialog.getByLabel('Food name')
@@ -79,8 +79,8 @@ test.describe('the add dialogs', () => {
   test('New Meal closes only through Cancel', async ({ page }) => {
     await openApp(page)
     await openMeals(page)
-    await page.getByRole('tab', { name: 'Meals' }).click()
-    await page.getByRole('button', { name: 'Add Meal' }).click()
+    await page.getByRole('tab', { name: 'Meals', exact: true }).click()
+    await page.getByRole('button', { name: 'Add Meal', exact: true }).click()
     const dialog = page.getByRole('dialog')
     await expect(dialog).toContainText('New Meal')
     const name = dialog.getByLabel('Meal name')
